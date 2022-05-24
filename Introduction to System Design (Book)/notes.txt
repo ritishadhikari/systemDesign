@@ -1,0 +1,23 @@
+Scalability: It is the capability of a system, process or network to grow and manage increased demand. 
+Any distributed system that can continously evolve to support the growing growing amount of work is considered
+scalable.
+
+Horizontal Scaling: It means that you scale by adding more servers into your pool of resources. Ex: Cassandra
+and MongoDB
+
+Vertical Scaling: vertical scaling means that you scale by adding more power (CPU, RAM, Storage, etc). Ex: MySQL
+
+Reliability: A distributed system is considered reliable if it keeps delivering its services even when one or 
+several of its software or hardware components fails. A distributed system achieves reliability through the
+reducndancy of both the software components and data.
+
+Availability: Availability is when a system remains operational to perform its required function in a specific
+period. If a system is reliable, then it is available. However, if it is available, it is not necessarily 
+reliable.
+
+Two Standard measures of efficiency are:
+    - Response Time (latency): Denotes the delay to obtain the first item.
+    - Throughput (Bandwidth): Number of items delivered in a given unit (eg. a second) 
+
+Serviceability or Manageability:  It is the simplicity and speed with which a system can be repaired or
+maintained. Early detection of faults can decrease or avoid system downtime. 
