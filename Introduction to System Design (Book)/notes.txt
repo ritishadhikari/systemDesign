@@ -21,3 +21,30 @@ Two Standard measures of efficiency are:
 
 Serviceability or Manageability:  It is the simplicity and speed with which a system can be repaired or
 maintained. Early detection of faults can decrease or avoid system downtime. 
+
+Capacity Estimation and Constraints:
+    - Traffic Estimates
+    - Storage Estimates
+    - Bandwidth Estimates
+    - Memory Estimates
+
+Incase we anticipate storing billions of rows, and we don't need to use relationships between objects, a 
+NoSQL DB is a better choice. A NoSQL choice would also be easier to scale. 
+
+Data Partition is requires to store information about billions of URLs. Partitioning can be carried out via:
+    - Range Based Partition
+    - Hash-Based Partition
+    - Caching of frequently used data
+
+When the Cache is full, and we want to replace a data which is the most recent one, we can chose the Least 
+Recently Used (LRU) policy, where in we discard the discard the least recently used data first from the
+cache memory.
+
+A Load Balancing mechanism with the Round Robin approach takes out the server which is dead and stops 
+sending any traffic. But a problem with Round Robin is that, it won't consider server load. Therefore if a 
+server is overloaded or slow, the LB will not stop sending request to that server. Hence a more intelligent
+solution is required.
+
+In an App like Instagram, we need to create an index on the photoId, creationDate in the photo table, since 
+we need to fetch recent images first.
+
