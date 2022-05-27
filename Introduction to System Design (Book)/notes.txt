@@ -48,3 +48,14 @@ solution is required.
 In an App like Instagram, we need to create an index on the photoId, creationDate in the photo table, since 
 we need to fetch recent images first.
 
+We can plan to have dedicated servers for reads and different servers for writes so as to ensure that 
+uploads don't hog the system.
+
+Rather than keeping data by userID to create shards, we must create unique dataID and then place those 
+dataID%100 in specific shards. When we do this, we do not place all the users data in a specific shard and
+hence do not congest it incase the userId happens to be an Influencer.
+
+A key generating DB can be a single point of failure. One work around could be defining two such databases, 
+one generating even-numbered IDs and the other odd-numbered. Alternately we can implement a key generation
+scheme.
+
