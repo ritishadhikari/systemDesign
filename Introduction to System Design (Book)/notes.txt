@@ -84,3 +84,4 @@ who are part of that chat. '
 To have push notification in our system, we would need to set up a Notification server, which will take the messages
 for offline users and send them to the mobile manufacturer's push notification server which will send them to 
 the user's device. 
+
