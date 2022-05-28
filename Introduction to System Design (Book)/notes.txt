@@ -59,3 +59,28 @@ A key generating DB can be a single point of failure. One work around could be d
 one generating even-numbered IDs and the other odd-numbered. Alternately we can implement a key generation
 scheme.
 
+In a HTTP Long Polling, clients can request information from the server to expect that the server may not
+respond immediately. If the server has no new data for the client when the poll is recieved, instead of 
+sending an empty response, the server holds the request open and waits for response information to become 
+available. Once it does have new information, the server immediately sends the response to the client, 
+completing the open request. Upon receipt of the server response, the client can immediately issue another 
+server request for future updates. This gives a lot of improvements in latencies, throughputs and performance. 
+However, the long polling request can timeout or receive a disconnect from the server. In that case, the client
+has to open a new request. 
+
+For instant messaging services, we can HBase which is a column-oriented key-value NoSQL database that can 
+store multiple values against one key into multiple columns. 
+
+HBase groups data togather to store new data in a memory buffer, and once the buffer is full, it dumps the 
+data to the disk. This storage method helps store a lot of small data quickly and fetching rows by the key
+or scanning ranges of rows. 
+
+HBase is also an efficient database to store variable-size data which is also required in instant messaging
+services.
+
+In a Group Chat, a group chat object is identified by GroupChatID and will maintains a list of people (UserId)
+who are part of that chat. '
+
+To have push notification in our system, we would need to set up a Notification server, which will take the messages
+for offline users and send them to the mobile manufacturer's push notification server which will send them to 
+the user's device. 
