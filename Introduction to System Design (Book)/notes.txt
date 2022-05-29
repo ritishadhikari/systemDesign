@@ -85,3 +85,7 @@ To have push notification in our system, we would need to set up a Notification 
 for offline users and send them to the mobile manufacturer's push notification server which will send them to 
 the user's device. 
 
+In a file storage system like DropBox and others, internally files can be stored in small parts or chinks (say 4MB). 
+This can provide many benefits, e.g., all failed operations shall only be retried for smaller parts of a file. If a 
+user fails to upload a file, then only the failing chunk will be retried. 
+
