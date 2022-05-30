@@ -89,3 +89,43 @@ In a file storage system like DropBox and others, internally files can be stored
 This can provide many benefits, e.g., all failed operations shall only be retried for smaller parts of a file. If a 
 user fails to upload a file, then only the failing chunk will be retried. 
 
+In a system like Google Drive, we would need the following servers:
+    - Block Servers which will work with the clients to upload/download files from cloud storage
+    - Metadata servers will keep metadata of files updated in a SQL or NoSQL database
+    - Synchronization servers will handle the workflow of notifying all clients about different changes 
+    for synchronization.
+
+The Message queuing service supports asynchronous and loosely coupled message-based communication between distributed
+components of the system. The Message Queing Service should efficiently store any number of messages in a highly
+available, reliable and scalable queue. 
+
+In dropbox, Message Queing Service will implement two types of queues in our system. The Request Queue is a global
+queue, and all clients will share it. Clients' requests to update the Metadata Database will be sent to the Request 
+Queue first. From there, synchronization service will take it to update the metadata. The response queue that 
+corresponds to individual subscribed clients are responsible for delivering the updated messages to each client. 
+Since a message will be deleted from the queue once received by a client, we need to create separate Response queues
+for each subscribed client to share update messages.
+
+
+Deduplication of incoming/outgoing data through hashing can be done via:
+    - Post Process Deduplication
+    - InLine Deduplication. Gives Optimal Network and storage usage as hash calculations are done real time.
+
+
+Partitioning can be carried out in the following way:
+    - Vertical Partitioning: Different Businesss Specific Tables in Different databases
+    - Range Based Partitioning: Separate partitions based on the first letter of the file path
+    - Hash Based Partition: Separate Partitions based on the hash of the FileID of the File Object. 
+
+
+Glossary:
+
+SQL vs No SQL: Relational databases store data in rows and columns. Each row contains all the information about one
+entity, and columns are all the separate data points.
+
+No SQL Databases have different data storage models. The main ones are key-value, document, graph and columnar. 
+
+SQL can be scaled vertically(CPU, memory, etc) which can be expensive while NoSQL can be scaled horizontally by 
+adding new servers which can be more cost effective. 
+
+SQL is ACID compliant while NoSQL is not ACID complaint.
