@@ -149,3 +149,37 @@ uses this connection to send data to a client. 1. Client request data from a ser
 webpage opens a connection to the server. 3. The server sends the data to the client whenever there's a new information
 available. SSEs are best, when we need real-time traffic from the server to the client or if the server is generating 
 data in a loop and send multiple events to the client.
+
+Various Load Balancing Algorithms:
+    - Least Connection Method: Directs traffic to the server with the fewest active connections. 
+    - Least Response Time Method: Directs traffic to the server with the fewest active connections and the lowest
+    average response time
+    - Least Bandwidth Method: Directs traffic to the server serving the least amount of traffic measured in Mbps.
+    - Round Robin Method: Cycles through a list of servers and sends each new request to the next server. When it 
+    reaches the end of the list, it starts over at the beginning. 
+    - Weighted Round Robin Method:  Each Server is assigned weights depending on their processing capacities, and 
+    servers with higher weights receive new connections before those with fewer weights. 
+    - IP Hash: A hash of the IP address of the client is calculated to redirect the request to a server.
+
+Redundant Load Balancers: The load balancer can be a single point of failure. To overcome this, a second load balancer can
+be connected to the first to form a cluster. Each LB monitors the health of the other and, since both of them are equally
+capable of serving traffic and failure detection, the second load balancer takes over in the event the primary load balancer
+fails. 
+
+Cache Invalidation Techniques:
+    - Write-through Cache: Data is written into the cache and the corresponding database simultaneously. Ensures complete
+    data consistency between cache and the storage. Disadvatage is higher latency for double write operations. 
+    - Write-around Cache: Data is only written directly into permanent storage bypassing the cache. Advantage is it 
+    reduces the cache being flooded with write operations. Disadvantage: Read request for recently written data will 
+    create a cache miss and must be read from slower backend storage and hence higher latency. 
+    - Write-Back Cache: Data is written to cache alone and completion is immediately confirmed to the client. The 
+    write to permanent storage is done after specified intervals or under certain conditions. Advantage
+    is low latency and high throughput for write-intensive applications. Disadvantage: More prone to data loss.
+
+Cache Eviction Policies: 
+    - First In First out
+    - Last In First out
+    - Least Recently used (LRU)
+    - Most Recently Used (MRU)
+    - Least Frequently Used (LFU)
+    - Random Replacement (RR)
