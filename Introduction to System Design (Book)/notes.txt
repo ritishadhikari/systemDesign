@@ -129,3 +129,23 @@ SQL can be scaled vertically(CPU, memory, etc) which can be expensive while NoSQ
 adding new servers which can be more cost effective. 
 
 SQL is ACID compliant while NoSQL is not ACID complaint.
+
+In Consistent Hashing, when the hash table is resized (e.g., a new cache host is added to the system), 
+only k/n keys  need to be remapped, where k is the total number of keys and n is the total number of servers. 
+While in a caching system using the 'mod' as the hash function, all keys need to be remapped. 
+
+In Consistent hashing, objects are mapped to the same host if possible. When a host is removed from the system, 
+its objects are shared by other hosts. When a new host is added, its takes its share from a few hosts without 
+touching other's shares. 
+
+WebSocket provides Full Duplex communication channels over a single TCP connection. It provides a persistent connection 
+between a client and a server that both parties can use to start sending data at any time. The client establishes a 
+Websocket connection through a process known as the WebSocket handshake. If the process succeeds, then the server and
+client can exchange data in both directions at any time. The Websocket protocol enables the communications between a 
+client and a server with lower overheads, facilitating real-time data transfer from and to the server.
+
+In a Server-Sent-Events(SSEs), the client establishes a persistent and long term connection with the server. The server
+uses this connection to send data to a client. 1. Client request data from a server using regular HTTP. 2. The requested
+webpage opens a connection to the server. 3. The server sends the data to the client whenever there's a new information
+available. SSEs are best, when we need real-time traffic from the server to the client or if the server is generating 
+data in a loop and send multiple events to the client.
