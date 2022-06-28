@@ -1,0 +1,40 @@
+Topic: Choosing the right Database
+
+Non Functional Requirements are impacted by the choice of Databases.
+
+Caching Solution -> Redis, Memcache, etc. 
+
+When we want to store Videos/Images: We would require Blob Storage. Ex. Amazon S3. 
+
+CDN is used for distributing a same file (Images, Videos, etc) in geographically different locations. 
+
+Hence for Blob Storage, we would be using an S3 along with CDN. 
+
+For Search Capability, we can use ElasticSearch and Solr. Both are built on top of Apache Lucene. 
+
+We must incorporate Fuzzy search capability for Elastic Search and Solr so that even if an user
+mispels certain keywords like airport as airprot, the search can identify the correct word.
+
+The difference between a Database and Search Engine is that Databases guarantees that data will not
+be lost, but Search Engine does not guarantee any such things. Hence the primary source of truth
+should be Databases and we can load the data into the search engines for searching capabilities. 
+
+Time Series Databases are similar to Relational Databases, but here in TS DBs, random updates does
+not take place. It's more kind of append only database. Also read query in TS DBs are bulk read
+queries spread across a time range. 
+
+Example of Time Series Database: Influx DB, Open DB. 
+
+When we want to do analytics on Transactional Databases, we use Datawarehouses. It provides
+inhouse capabilities for Queries by aggregating on large transactions. 
+
+For Databases which will provide us ACID guarantees (ex. in a bank transactions one account's debit
+should be equal to one account's credit), we should relational Databases like MySQL, Oracle,
+SQL server, Posgres. 
+
+For Databases where we need wide variety of datatypes and characteries for individual attributes, we 
+should chose Document DB. Ex. MongoDB and CouchBase. 
+
+For ever Increasing data, but with limited Quering capabilities w.r.t. Document DBs and whose
+ACID properties may not be guaranteed, we can chose Columnar DataBases. Ex. Cassandra, HBase, etc. 
+
