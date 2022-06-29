@@ -1,4 +1,4 @@
-Topic: Choosing the right Database
+Section 2: Choosing the right Database
 
 Non Functional Requirements are impacted by the choice of Databases.
 
@@ -40,4 +40,95 @@ ACID properties may not be guaranteed, we can chose Columnar DataBases. Ex. Cass
 
 For Complex Scenarios where there are ever increasing transactions as well as where ACID properties
 needs to be preserved, we must use combination of Columnar DBs and RBDMS. 
+
+Section 3: System Design Case Studies - Practical Real world applications
+
+Topic 1: URL Shortener System Design
+
+Functional Requirements: 
+    - Get Short URL
+    - Redirect to Long URL
+Non Functional Requirements:
+    - Very Low Latency
+    - Very High Availability
+
+Number of Unique Request the system can handle in 10 years considering it recieves X requests per
+second:
+ X*60*60*24*365*10 = Y Total Requests
+
+What all characters to consider for the url: 
+Here we consider : a-z, A-Z and 0-9 = 26+26+10 = 62 Alphabets
+
+We then need to consider, how long will our URL be:
+If we Choose one length, we can only have 62 URLs, 
+If we Chose twp length, we can chose 62*62=62^2 characters
+Similarly, if we chose n length, we can chose 62^n characters
+
+We have to opt for a length such that 62^n > Y
+OR, n > log(62)Y
+
+If we consider 2000 request per seconds, then 
+Y=X*60*60*24*365*10=2000*60*60*24*365*10=630720000000 requests in 10 years
+
+Hence, n> log(62)630720000000
+Hence n>6.58.
+
+Hence Minimum Length of the URL shortener will be 7.  
+
+Maximum URL that can be supported is 62^7=3521614606208=3.5 T URLs. 
+
+If we are using two or multiple servers to generate the Short URL, the two server can generate the 
+same short url and this may lead to collision. 
+
+Hence to Counter this problem, these multiple URL shortener servers can be the client to Redis
+Server which can provide the URL Shorteners to the client URL shortening service and auto increment
+its count. This will have one major problem: The Redis Server here will become the single point of
+failure. 
+
+The alternate to the above problem is keep two (or more) redis server, but make sure the url-shortener
+keys that these multiple redis server stores are distinct from one another. One URL Shortener will be 
+connected to few URL shortener servers, while the other URL Shortener will be connected to the 
+remaining URL shortener servers. This way there will not be any point of failures. 
+
+What if we need to add more redis servers, than we might need to again auto allocate and distribute the
+URL shortening keys to the new redis server. Hence we can totally leave aside redis and we can auto
+distribute the token numbers with specific range to each URL Shortener servers. These URL shortener 
+servers will directly connect to token generation service which will provide the tokens based on
+the token range assigned to the URL shortener servers. This new Token Server will be a simple mysql 
+database. Once one key is utilized, it will be marked as taken, and that url can never be provided 
+again. 
+
+The token service must have multiple replicas, so that it does not become a single point of failures. 
+
+One problem of the token service is that, incase one of the URL shortener service which is assigned 
+range of tokens, dies down while being operational, then in that case we will be loosing out on the 
+tokens which might go for ever. For simplicity purpose, we don't require to keep track of those tokens
+which are lost. 
+
+For retrieval of the longer url by providing the short url, the short url service takes the short
+url, it then takes the information from the backend cassandra database and gives back the long 
+url back to the client requesting for the long url.
+
+Cassandra is preferred because it has to store 3+ trillion records. 
+
+At present no other information is being captured:
+    - From which location is the request coming for generating the Short URL
+    - From what kind of device is the request coming, etc. 
+
+To log analytics, KAFKA based asynchronous topics can be created which will capture the relevant 
+information and store it in some database for visualization purpose. 
+
+The downside of using Kafka asynchronous is there might not be few non captured events, and since
+it is a non financial logs, few misses are fine. 
+
+Another downside is Using Kafka for capturing every logs which involves CPU and Memory. What we can 
+do in this case is we can create queuing mechanism, such that incase the queue crosses certain 
+thresholds, we can then aggregate the logs and flush them all at once into Kafka Topic. This way, 
+the IO needed while utilizing KAFKA greatly reduces as KAFKA calls will happen N%M times where 
+M is the number of records captured in the queue at a given time. It is thus more batch than 
+real time.
+
+
+
+
 
