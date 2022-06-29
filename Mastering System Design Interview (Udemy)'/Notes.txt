@@ -38,3 +38,6 @@ should chose Document DB. Ex. MongoDB and CouchBase.
 For ever Increasing data, but with limited Quering capabilities w.r.t. Document DBs and whose
 ACID properties may not be guaranteed, we can chose Columnar DataBases. Ex. Cassandra, HBase, etc. 
 
+For Complex Scenarios where there are ever increasing transactions as well as where ACID properties
+needs to be preserved, we must use combination of Columnar DBs and RBDMS. 
+
