@@ -128,7 +128,63 @@ the IO needed while utilizing KAFKA greatly reduces as KAFKA calls will happen N
 M is the number of records captured in the queue at a given time. It is thus more batch than 
 real time.
 
+Topic 2: Airbnb / Booking.com System Design
 
+Functional Requirements:
+    - Hotel
+        - Onboarding
+        - updates
+        - Bookings
+    - User
+        - Search
+        - Book
+        - Check Bookings
+
+Non Functional Requirements:
+    - Low Latency
+    - High Availability
+    - High Consistency
+    - Scale:
+        - 500 K hotels
+        - 10 M rooms
+        - 1000 rooms/hotel
+
+The Detailed Workflow:
+    - UI App for hotel room owners to add and update rooms. The rooms details will be stored in 
+    MYSQL database (Information DB). The Images of the hotels will be stored in CDNs
+    - UI App for users to search and book hotels.
+        - The search service is powered by Elastic Search Cluster which sends out a KAFKA pull
+        request to the MYSQL Databases (Information DB and Rooms Availability DB). The search
+        should have fuzzy capabilities. 
+        - The booking service should be able to retrieve the data from the Rooms Availability
+        MySQL DB and update the Database. The Terminal Booking state, i.e., cancelled bookings and 
+        past bookings are stored in a Cassandra DB with partition on UserIDs
+    - UI App for Management Service to get a view on current bookings by pulling from the 
+    Rooms Availability DB through Redis (so as not to put more load on the Avalability DB) and
+    a Cassandra DB which contains historic imformation on users bookings and Cancellation Status.
+    - For Analytics, Spark Streaming can be utilized directly from Kafka. For Machine Learning, train
+    from Cassandra DB and Predict using Kafka and Spark Streaming.
+
+    DataBase and HTTPs Information:
+        POST /hotels: Add new hotels
+        GET /hotels/id: Get information about existing hotels
+        PUT /hotels/id: Update Hotel related Information
+        PUT /hotels/id/rooms/id: Update Information about Hotel's room 
+    
+    Hotel DB: 
+        hotel - [id, name, locality-id, description, original_images,display_images,is_active]
+        hotel-facilities - [id, hotel_id, facilty_id, is_active]
+        rooms - [id, hotel_id, display_name, is_active, quantity, price_min, price_max]
+        rooms_facilities - [id, room_id, facility_id,is_active]
+        facilities - [id, display_name]
+        locality - [id, city_id, state_id, country_id, zip_code, is_active]
+
+    Booking DB: 
+        Available rooms  - [room_id, date, initial_qty, available_qty], constrains available_qty>0
+        Booking [booking_id, room_id, user_id, start_date, end_date, no_of_rooms, status, 
+                invoice_id]. Caveat: One room_id for one_booking
+        Status are: [Reserved, Booked, cancelled, completed]
+        
 
 
 
