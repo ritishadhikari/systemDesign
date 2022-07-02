@@ -181,10 +181,25 @@ The Detailed Workflow:
 
     Booking DB: 
         Available rooms  - [room_id, date, initial_qty, available_qty], constrains available_qty>0
-        Booking [booking_id, room_id, user_id, start_date, end_date, no_of_rooms, status, 
+        Booking - [booking_id, room_id, user_id, start_date, end_date, no_of_rooms, status, 
                 invoice_id]. Caveat: One room_id for one_booking
         Status are: [Reserved, Booked, cancelled, completed]
         
+    For Booking a Room:
+        - A post request will be sent with the user_id, room_id, quantity, start_date
+        and end_date 
+        - Check in available rooms
+        - Insert in booking and reduce the available_qty field in the available rooms 
+        - Put in redis with TTL to check whether payment has been carried out before key
+            expiry. Incase Payment is a failure, then we need to unblock the room with 
+            status  reserved to cancelled and we should increment the available_qty to 
+            its earlier state. Incase the payment is a success before key expiry, then 
+            we need to book the room from reserve and generate an invoice ID. Here 
+            redis call back is used for record updation. 
+    
+    We must distribute the database as per geography. We can create a primary replica
+    which will have a backup replica for each region. Users who are near to a specific 
+    region gets access to the data for those regions for ticket bookings. 
 
 
 
