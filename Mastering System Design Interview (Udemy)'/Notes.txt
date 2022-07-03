@@ -197,9 +197,65 @@ The Detailed Workflow:
             we need to book the room from reserve and generate an invoice ID. Here 
             redis call back is used for record updation. 
     
-    We must distribute the database as per geography. We can create a primary replica
-    which will have a backup replica for each region. Users who are near to a specific 
-    region gets access to the data for those regions for ticket bookings. 
+We must distribute the database as per geography. We can create a primary replica
+which will have a backup replica for each region. Users who are near to a specific 
+region gets access to the data for those regions for ticket bookings. 
+
+Topic: Amazon System Design (Design an Ecommerce Application)
+
+Functional Requirements:
+    - Search
+    - Cart/ Wish List
+    - Checkout
+    - View Orders
+
+Non Functional Requirements:
+    - Low Latency
+    - High Availability
+    - High Consistency
+
+High Level Design Information:
+    - An Inbound Service communicates with the sellers about any new product characteristics
+    - This Inbound Service is fed through Kafka. 
+    - There will be an Item Service which stores the details of new item and stores it in 
+    MongoDB. It acts like the Item DB 
+    - When ever an User search for a specific information, it comes through a User Search Page. 
+    The items are stored in an Elastic Search and are retrieved through a search service. 
+    - The Search Service is connected to a Serviceability + TAT service which provides the
+    item delivery time information and also whether the item can be delivered to that specific 
+    location. 
+    - The Search service is also connected through to a Cart Service and a Wish List Service. Both
+    are connected to individual MYSQL DB. 
+    - The search service is also used for Analytics as the information flows through Kafka with
+    userID and ItemID information. 
+    - The Analytics service will run a Spark Streaming Job and run Machine Learning Algorithms 
+    over a Spark Cluster and they in turn would populate the recommended items in the User's 
+    home page.
+    - The User Service provides the details about the user to both the search service and the 
+    User Home Page. It sits on Top of a SQL DB and connected through Redis. A query is made 
+    to redis related to the details of the user to the Redis. If the details is not found, it is
+    directly queries to the MYSQL DB and the user details are fetched through the User Service and 
+    populated in the Home Page and Search page. 
+    - The Warehouse service and Logistics service are called by the Serviceability + TAT service to
+    calculate the shortest path and time.
+
+For the User Purchase Flow, it will communicate to a Order Taking Service which will use a
+SQL Database to store the order information. When an order moved for payment, the order Taking
+service (OTS) would capture the information in the SQL would call another service  - Inventory Service
+ (IS) and its associated MYSQL DB and thereby decrease the count. It will wait for the communication
+from the Payment service. If the payment service confirms the payment, the mysql connected to the
+order taking service will be updated to Order Confirmed. Incase the payment is a failure, then the
+SQL DB for OTS will be updated to cancelled and the SQL DB for IS will be updated as per the count
+of cancelled order. In-case no communication is received from the payment gateway, a redis server
+which is communicating with the MYSQL DB of OTS will signal a timeout and the DB will get updated 
+to cancelled followed by DB update in IS. 
+
+
+
+
+
+
+
 
 
 
