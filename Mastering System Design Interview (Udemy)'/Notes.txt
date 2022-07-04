@@ -240,15 +240,48 @@ High Level Design Information:
     calculate the shortest path and time.
 
 For the User Purchase Flow, it will communicate to a Order Taking Service which will use a
-SQL Database to store the order information. When an order moved for payment, the order Taking
+SQL Database to store the order information. When an order is moved for payment, the order Taking
 service (OTS) would capture the information in the SQL would call another service  - Inventory Service
- (IS) and its associated MYSQL DB and thereby decrease the count. It will wait for the communication
+(IS) and its associated MYSQL DB and thereby decrease the count. It will wait for the communication
 from the Payment service. If the payment service confirms the payment, the mysql connected to the
 order taking service will be updated to Order Confirmed. Incase the payment is a failure, then the
 SQL DB for OTS will be updated to cancelled and the SQL DB for IS will be updated as per the count
 of cancelled order. In-case no communication is received from the payment gateway, a redis server
 which is communicating with the MYSQL DB of OTS will signal a timeout and the DB will get updated 
 to cancelled followed by DB update in IS. 
+
+Continuing the above case, the normal case is payment update takes place first followed by 
+a Redis Time Out. To combat this scenario, as soon as the payment update takes place, the 
+associated record may be deleted from Redis. The other scenario happpens when the 
+payment update happens later than the the Redis TimeOut. Here OTS would be updated to cancelled 
+state and the IS will be updated to the earlier count. In this case, either the amount is
+refunded to the user, or the same order is placed for the user once the payment update is 
+received. 
+
+The Redis timeout generally happens tad later than the declared time. It is okay in this case. 
+
+The MYSQL db which preserves ACID properties, can be prone to bottleneck. To combat this problem, 
+the Orders which has reached their terminal state (order delivered or return days has passed)
+can be transferred to a Cassandra DB through an Archival Service. The Archival Service calls
+an Order Processing Service for fetching the records which have reached the terminal state. The
+records when received is transferred to the Historical order service and this Service populates
+the data in Cassandra. The same data is then deleted in MYSQL through the Order Processing Service. 
+The Archival Service is a Cron Setup which will run at a specified duration.
+
+To view pervious and current orders, the Orders View Service will call both the Order Processing
+Service (to call the MYSQL db) and the Historical Order Service (to call the Cassandra DB) to 
+merge the present and the historical orders and thereby Showcase to the User.
+
+Once an Order is placed, it triggers a Notification Service which alerts the Customer and the
+sellers. 
+
+The orders which are placed, are sent to KAFKA and are used for Spark Streaming. The Spark 
+Streaming will run a Machine Learning for Recommendation and will populate the recommended
+next set of buys for the users when they logs in.
+
+
+
+
 
 
 
