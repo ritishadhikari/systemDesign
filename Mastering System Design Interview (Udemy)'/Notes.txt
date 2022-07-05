@@ -279,11 +279,86 @@ The orders which are placed, are sent to KAFKA and are used for Spark Streaming.
 Streaming will run a Machine Learning for Recommendation and will populate the recommended
 next set of buys for the users when they logs in.
 
+Topic: Chat Application System Design. Ex. Whatsapp, Facebook, Messenger, etc 
+
+Functional Requirements:
+    - One to One Chat
+    - Group Chat
+    - Send and Receive Text/ Images/ Videos  
+    - Read Receipt
+    - Last Seen
+
+Non Funtional Requirements:
+    -  2 Billion users
+    - 1.6 Billion Monthly Active Users
+    - 65 Billion Messages per day
 
 
+High Level Design:
+    - Each user sends message to other users through a message ID and through a certain port 
+    in a server called Web Socket Handler. Each machine has roughly 65K ports, and out of which
+    if 5k ports are for internal usage, then we have 60K ports for allocating to individual users
+    per machine. 
+    - The websocket handler connects to a Web Socket Manager which stores the information about 
+    the devices of the sending user, sender's and receiver's Web Socket Handler details and 
+    also list of users connected to the same web socket. 
+    
+    - A Redis Server sits on top of this Web Socket Manager, the Redis server which gets updated once the 
+    data flows into the Web Socket Manager. 
 
+    - The Web Socket Handler also connects to a Message Services which stores the information to a 
+    Cassandra DB which scales preety well.
 
+    - When a User wants to send a message, its corresponding web socket controller sends the information 
+    to Web Socket Manager (WSM), the sending party retreives the web socket controller information 
+    details of the receiving party from the WSM and sends the messages directly to the web socket 
+    controller of the receiving party. And there by bi-directional message flow is established through 
+    a web socket. 
 
+    - When a new user tries to post a message to another new user, Redis Server is queried to check whether
+    both the new users are part of the same Web Socket Handler. If yes, then the Web Socker Manager is 
+    not queries and it redices the latency. 
+
+    - The cache time is kept at a significantly less duration as the devices of the users connected
+    to a particular Web Socker Handler might change very frequently. 
+
+    - The messages which one user sends to another needs to be stored atleast temporarily to a 
+    Cassandra Database through Message Services. 
+
+    - Incase a sender sends a message to a receiver, but the receiver is not connected to the any web 
+    socket, then the messages with relevant details flows into the Cassandra DB through message service. 
+    Now after sometime once the user comes online, it queries the Message Service regarding any Messages
+    it had recieved along with the senders Socket Handler details, and there by it starts a web socket 
+    connection with the senders Socket Handler.
+
+    - There can be a scenario when the Message is sent but the receiver just happens to have come online
+    and before the the Socket Manager could identify the receiver's corresponding socket handler's
+    information and store the information in Cassandra DB (once it finds out that the receivers web 
+    socket does not exists), the reciever query the Database and finds out that no message has been 
+    received. To tackle this kind of a scenario, the web socket handler of the receiver can establish a 
+    Long Polling with the messaging service and get the message only once it receives from the 
+    message service. Alternately the receiver's socket handler can make multiple requests to the message
+    services. 
+
+    - Incase an User is offline, but still sends some messages. In this situation, the messages gets 
+    stored to the users local device db and once the user comes online, the user is connected a specific
+    socket handler and the message is transferred from the user's local db to the messaging system server. 
+
+    - For Group Messaging Service, the message is not trasferred through a Web Socket Handler, which 
+    is more oriented for one-on-one messaging. Once a service is made to a group, it is directly 
+    sent to the messaging service the messaging service sends the message and group information to 
+    a KAFKA topic which is pulled by Group Message Handler Service. The Group Message Handler after
+    receiving the details of the group and the sender, queries the Group Service to fetch the associated
+    members in the group except for the sender. These senders' details are then queried through the 
+    Web Socket Manager and their Web Socket Handlers are identified and the messages are delivered to 
+    the individuals through the Web Socket Handler.
+
+    - For sharing Images or Videos, the Images are shared to the Asset Service, which encrypts the image,
+    stores it in a S3 bucket (CDN can also be applied to these images) and shares the https link with the 
+    socket handler and then this socket handler transfers the image address to the recipient through Web 
+    Socket Connectivity.  
+
+    
 
 
 
