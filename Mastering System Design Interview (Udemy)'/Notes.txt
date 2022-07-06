@@ -61,7 +61,7 @@ Here we consider : a-z, A-Z and 0-9 = 26+26+10 = 62 Alphabets
 
 We then need to consider, how long will our URL be:
 If we Choose one length, we can only have 62 URLs, 
-If we Chose twp length, we can chose 62*62=62^2 characters
+If we Chose two length, we can chose 62*62=62^2 characters
 Similarly, if we chose n length, we can chose 62^n characters
 
 We have to opt for a length such that 62^n > Y
@@ -124,7 +124,7 @@ it is a non financial logs, few misses are fine.
 Another downside is Using Kafka for capturing every logs which involves CPU and Memory. What we can 
 do in this case is we can create queuing mechanism, such that incase the queue crosses certain 
 thresholds, we can then aggregate the logs and flush them all at once into Kafka Topic. This way, 
-the IO needed while utilizing KAFKA greatly reduces as KAFKA calls will happen N%M times where 
+the IO needed while utilizing KAFKA greatly reduces as KAFKA calls will happen N//M times where 
 M is the number of records captured in the queue at a given time. It is thus more batch than 
 real time.
 
@@ -301,7 +301,7 @@ High Level Design:
     per machine. 
     - The websocket handler connects to a Web Socket Manager which stores the information about 
     the devices of the sending user, sender's and receiver's Web Socket Handler details and 
-    also list of users connected to the same web socket. 
+    also list of users connected to the a particular web socket. 
     
     - A Redis Server sits on top of this Web Socket Manager, the Redis server which gets updated once the 
     data flows into the Web Socket Manager. 
@@ -309,24 +309,24 @@ High Level Design:
     - The Web Socket Handler also connects to a Message Services which stores the information to a 
     Cassandra DB which scales preety well.
 
-    - When a User wants to send a message, its corresponding web socket controller sends the information 
-    to Web Socket Manager (WSM), the sending party retreives the web socket controller information 
+    - When a User wants to send a message, its corresponding web socket handler sends the information 
+    to Web Socket Manager (WSM), the sending party retreives the web socket handler information 
     details of the receiving party from the WSM and sends the messages directly to the web socket 
     controller of the receiving party. And there by bi-directional message flow is established through 
     a web socket. 
 
     - When a new user tries to post a message to another new user, Redis Server is queried to check whether
     both the new users are part of the same Web Socket Handler. If yes, then the Web Socker Manager is 
-    not queries and it redices the latency. 
+    not queried and it redices the latency. 
 
     - The cache time is kept at a significantly less duration as the devices of the users connected
-    to a particular Web Socker Handler might change very frequently. 
+    to a particular Web Socket Handler might change very frequently. 
 
     - The messages which one user sends to another needs to be stored atleast temporarily to a 
     Cassandra Database through Message Services. 
 
-    - Incase a sender sends a message to a receiver, but the receiver is not connected to the any web 
-    socket, then the messages with relevant details flows into the Cassandra DB through message service. 
+    - Incase a sender sends a message to a receiver, but the receiver is not connected to any socket 
+    handler, then the messages with relevant details flows into the Cassandra DB through message service. 
     Now after sometime once the user comes online, it queries the Message Service regarding any Messages
     it had recieved along with the senders Socket Handler details, and there by it starts a web socket 
     connection with the senders Socket Handler.
@@ -341,8 +341,9 @@ High Level Design:
     services. 
 
     - Incase an User is offline, but still sends some messages. In this situation, the messages gets 
-    stored to the users local device db and once the user comes online, the user is connected a specific
-    socket handler and the message is transferred from the user's local db to the messaging system server. 
+    stored to the users local device db and once the user comes online, the user is connected to a 
+    specific socket handler and the message is transferred from the user's local db to the messaging 
+    system server. 
 
     - For Group Messaging Service, the message is not trasferred through a Web Socket Handler, which 
     is more oriented for one-on-one messaging. Once a service is made to a group, it is directly 
@@ -358,7 +359,24 @@ High Level Design:
     socket handler and then this socket handler transfers the image address to the recipient through Web 
     Socket Connectivity.  
 
-    
+    - During Sports events or Political Events, one image/videos can be uploaded multiple times. 
+    In order to let go on storing of duplicate images, we use multiple hashing algorithms on the image
+    and validate whether the hash values already exists in the db. If it exists, then don't upload and 
+    just provide the existing link, else upload and provide the existing link. 
+
+The User App will have the Following services:
+    - User Service: Responsible for storing and fetching all the user related information. Sits on top 
+    of a MYSQL user DB and is connected to Redis for caching.
+    - Group Service: Responsible for storing and fetching information related to group and its members. 
+    Like a User Service, this too sits on top of a MYSQL DB and is connected to Redis for caching.
+    - Analytics Service: The chat information of a user is sent via Kafka for Analytics service probably
+    through Spark Streaming. 
+    - Last Seen Service: The last seen service takes the users last seen status through KAFKA (above) 
+    and Populates it in Cassandra Database. Since the throughput is very high, we use a Cassandra DB and 
+    not MySQL. 
+
+For Monitoring of various DBs, KAFKA latencies and others, we can use Grafana. 
+
 
 
 
