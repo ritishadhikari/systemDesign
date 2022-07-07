@@ -315,9 +315,9 @@ High Level Design:
     controller of the receiving party. And there by bi-directional message flow is established through 
     a web socket. 
 
-    - When a new user tries to post a message to another new user, Redis Server is queried to check whether
-    both the new users are part of the same Web Socket Handler. If yes, then the Web Socker Manager is 
-    not queried and it redices the latency. 
+    - When a new user tries to post a message to another new user, Redis Server is queried to check 
+    whether both the new users are part of the same Web Socket Handler. If yes, then the Web Socker 
+    Manager is not queried and it redices the latency. 
 
     - The cache time is kept at a significantly less duration as the devices of the users connected
     to a particular Web Socket Handler might change very frequently. 
@@ -376,6 +376,53 @@ The User App will have the Following services:
     not MySQL. 
 
 For Monitoring of various DBs, KAFKA latencies and others, we can use Grafana. 
+
+Topic: Notification System at Scale
+
+Functional Requirements:
+    - Send Notifications
+    - Plugable
+    - SaaS
+    - Prioritization
+
+Non Functional Requirements:
+    - High Availability
+    - Many Clients
+
+The High Level Design is like:
+    - For SAAS, what kind of message it is used for sending, email, generic etc is taken for 
+    consideration
+    - For internal usage of the notification service, the priorities will be embedded. 
+    - Once messages are received from various clients it is sent to KAFKA. 
+    - Before proceeding farther, a Notification Validator and prioritizer checks whether the conditions
+    are being met, like recipients are not null, etc. Also User Transaction Data is also validated to be 
+    Not Null.
+    - Once the Validation is done, the messages passes through a rate limiter/request counter service
+    through another KAFKA based service. The rate limiter service checks the number of messages passing 
+    at a specified duration. It uses redis in the backend to increment the counter. The Request Counter 
+    Service checks the number of requests coming from the subscription service. It does not put a limit 
+    on the rate, bit it auto-increments the bill per requests made. This too uses a redis in the backend 
+    for increasing the request count. 
+    - After the rate limiter/request counter service, comes the Notification Handler and User
+    Preference Service which limits the number of requests we can make to a particular user and
+    also which users to communicate. It uses MySQL DB in its backsend. 
+    - Once the above stages passes, the notification message is passed through another KAFKA topic:
+        - SMS Handler: For Handling SMS along with its Regional Vendors
+        - Email Handler: For Handling Emails along with its Regional Vendors
+        - In-App Handler: For handling messages in Databases Like Firebases, Apple Push, etc
+        - IVRS Handler: For Handling COD related Messages. Requires Low Throughput.
+    - All the messages which is flowing through the Notification Handler and User
+    Preference Service will be sent to a Notification Tracker Service which would populate the
+    message in a Cassandra DB. Incase some one sues or during auditing, this database
+    will be handy for exploring all notifications that were ever sent. 
+    - Incase of order which needs to be sent in Bulk, ex. pass the message to the consumers who
+    have purchased a TV in the last 24 hours, or purchased milk for repurchase, the message once
+    it passes the Notification Handler and User Preference Service, the KAFKA topic also connects 
+    with the Transaction Data Parser Service which after parsing the information, stores the info 
+    in Elastic Search or MongoDB, etc. This db is used by Query Engine for performing multiple 
+    actions like a. Rule Engine (suspend users who frequently cancels orders), b. Fraud Detection, 
+    c. Search Platform. By utilizing the Searh Platform, a Bulk Notification service is performed and 
+    the message is sent to the Notification Service. 
 
 
 
