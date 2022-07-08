@@ -425,9 +425,68 @@ The High Level Design is like:
     the message is sent to the Notification Service. 
 
 
+Topic: Ola/Uber System Design
 
+Functional Requirements:
+    - See Cabs
+    - ETA & approx Price
+    - Book a Cab
+    - Location Tracking
 
+Non Functional Requirements: 
+    - Global
+    - Low Latency
+    - High Availability
+    - High Consistency
+    - Scale
+        - 100 Million Users
+        - 10 Million rides per day
 
+A grid style segment is created where Cabs are tracked and Cab's Location are continously
+changing and hence the tracking has to be done real time. 
+
+The Map Service does the Segment Management (Grid) service and allocate the number of 
+drivers to be present in a particular location and also should two or more segments be 
+merged based on traffic patterns. 
+
+High Level Design:
+    - The User App connects to a User Service through a Load Balancer. This User Service is 
+    responsible for connecting to UserDB and Redis and updating the profile information of 
+    the user along with other user details. 
+    - For Booking a Cab, a Cab Request Service talks with the Cab Finder Service and through
+    a web socket, the User App books the Cab. 
+    - A driver connects through a Driver App via the Driver Service. The Driver Service provides
+    all the details regarding the driver, the payment information among others. The Driver 
+    Service connects to a Driver MYSQL DB at the backend powered by redis. 
+    - The Driver App also connects to a Location Service which gives the location details of 
+    the drivers so that the Map Service can utilize the same and aid the Cab Finder. 
+    
+    - The Drivers Connects to multiple services via Web Socket Handlers (Servers) and the 
+    websocket handler:driver mapping is stored in WebSocket Manager. The same is also
+    stored in a redis cluster. The Redis Cluster contains the mapping of d:h, i.e, which
+    driver gets connected to which host. 
+    - The Drivers:WebSocket Handler Connects to the Location Service as well which
+    populates the data in a Cassandra DB such that it can store an ever growing information 
+    of the driver's location. The Location Service is also connected to the Maps Service 
+    and the map service gives the segment:driver location which is passed to the Location 
+    Service and it stores the data in a Redis DataBase. 
+    - The Trip Service Provides Trip related information of each drivers and users. All the 
+    latest trip or ongoing trip information is stored in a MySQL DB and the historical trip 
+    information is stored in Cassandra DB. To populate the historical trip information from 
+    MYSQL to Cassandra, we use a Trip Archiver Service, which uses a Cron Service at the
+    backend to transfer the data.
+    - The Customer's journey starts with the Cab Service Requests. The Cab Service Request
+    queries the Cab Finder which in turn queries the Location Service. The Location Service 
+    in turn queries the Map Service and the Map Service takes the Customers Latitude and 
+    Longitute and searches the Driver on a certain segment and its adjoining segment and provides
+    a list of available drivers BACK to the Cab Finder Service. The cab finder service in turn
+    queries a Driver Priority Engine to assign a suitable driver for the customer. If the 
+    customer is a premium customer, than the Driver Priority Engine would provide the best Driver
+    of the lot. If it is a normal customer, then the Driver Priority Engine will Broadcast the 
+    Drivers about the Customer, and the Driver who selects the customer at the earliest, is
+    auto assigned the driver. Now the Driver host is fetched from the WebSocket Manager, where
+    Driver:Host combination is stored. The Driver is contacted via the host, and upon the approval
+    of the driver, the Customer is notified of the driver and his/her details.
 
 
 
