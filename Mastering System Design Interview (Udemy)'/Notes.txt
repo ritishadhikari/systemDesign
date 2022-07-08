@@ -487,6 +487,18 @@ High Level Design:
     auto assigned the driver. Now the Driver host is fetched from the WebSocket Manager, where
     Driver:Host combination is stored. The Driver is contacted via the host, and upon the approval
     of the driver, the Customer is notified of the driver and his/her details.
+    - The Messages from Driver Priority Engine, Cab Finder Service and Location Service is 
+    transferred to KAFKA for performing Analytics. 
+    - The Kafka cluster can be used to aggregate the payment information of the drivers and the 
+    payment calculation can happen over a MYSQL. 
+    - Also to mitigate the No Driver Found Issue, the Analytics can communicate the Drivers 
+    regarding sparse Driver Zone. Also Spark ML jobs can run to feed the Driver Priority Engine and 
+    Customer Clssification (Premium or Regular). Driver Profiling and User Profiling. 
+    - The Analytics can also run a fraud detection algorithm, where in if a driver books a
+    drive from his own car, then it should be marked as fraudulent based on the consistent latitude
+    and longitude of the customer's contact and the driver's contact. 
+    - The Analytics can also power the map service by predicting the quality of the road, by 
+    calculating the average speed of other company cars in the same road.
 
 
 
