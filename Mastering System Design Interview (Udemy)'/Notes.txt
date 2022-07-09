@@ -500,6 +500,86 @@ High Level Design:
     - The Analytics can also power the map service by predicting the quality of the road, by 
     calculating the average speed of other company cars in the same road.
 
+Topic: Twitter System Design 
+
+Functional Requirements:
+    - Tweet
+    - Re-Tweet
+    - Follow: Unidirectional. User A follows User B does not mean that User B will follow
+    User A. 
+    - Search: Search Capability on trending events. 
+
+Non-Functional Requirements:
+    - Read Heavy - More People sees tweet than post
+    - Fast Rendering - Tweets should be able to rendered to the read user pretty fast. 
+    - Fast Tweet - Tweets should be promptly uploaded
+    - Lag Okay in some cases - The Tweets can be taken some time to be visible to the users who
+    are reading it. 
+    - Scale 
+        - 150 Million Daily active users
+        - 350 Million Monthly active users
+        - 1.5 Billion Accounts
+        - 500 Million Tweets per day
+            - Turns out to 5700 tweets/sec
+            - 12000 Tweets/sec during peek hours.
+
+Type of Users Classified in Twitter:
+    - Famous Users: Celebrities, Politicians, etc
+    - Active Users: Users who have used Twitter in the last 3 days
+    - Live Users: Users who have are presently accessing Twitter
+    - Passive Users: Users who are neither celebrities nor active users
+    - Inactive Users: Users who have gone through soft delete state.
+
+User Onboarding Design:
+    - The User Onboarding and Login happens through a User Service. Any User/Users information
+    is fetched through the User Service. The User Service sits on top of a MySQL user db. The 
+    choice of DB is SQL because even though the user size is great, it will still be finite. 
+    There is also a Redis Cache connected to the User Service. Incase the information about 
+    a certain user is fetched, it will first search the redis, and if information is not found, 
+    then it will do a read operation on the SQL database. 
+    - Redis will have the following details:
+        - User Details
+        - Followers
+        - Following
+        - Type
+        - Last Access Time
+    - A User Follow API is connected through a Load Balancer to a Graph Service which will
+    have the logic to find the Followers and Following of a Particualr User. The Graph Service
+    sits on top of a MySQL Cluster which is sharded and also connects to a Redis Cluster. When
+    ever a request is made through an UI, the Graph Service first queries the Redis DB and tries
+    to find the followers and following. If the redis does not have the information stored, 
+    then it queries the sharded MYSQL DB. 
+    - The Third Service which can be used is to provide Analytics on users (users who spends time
+    more on a particular tweet). The repsonse from the analytics service can be sent to KAFKA
+    - For Live Users, User Live WebSockets (Notifications) are created, and once the User becomes
+    Active, the information is sent through KAFKA to the User Service and the status of that
+    user is subsequently updated. 
+    
+Tweet Process:
+    - When an User tries to post a tweet, it passes through a Load Balancer and hits the Tweet
+    Ingestion Service (TIS). The TIS is used only for POST based Call.
+    - Incase the Tweet contains multimedia files then it will be passed through an Asset Service
+    and incase the Tweet contains a Long URL (Max Tweet Length is 140 Characters), it will
+    pass through a URL shortening Service. 
+    - The Tweets that are processed by the Tweet Ingestion Service sits on top of a Cassandra 
+    DB. Cassandra is chosen due the volume of the tweets which are collected by Twitter each day. 
+    - The Tweet that is getting stored in the Cassandra DB contains the following information:
+        - Tweet ID
+        - User ID who posts the tweet
+        - Tweet Content
+    - The TIS also puts the tweet to a KAFKA for further analytics. 
+    - To get the user's tweet content/ create time lines of users, a Tweet Service is used. 
+    This gets the details from the Cassandra DB and populates the relevant information.
+    - The User TimeLine UI gives all the tweets/ retweets the user has made through the Time line
+    Service
+    - The Home TimeLine UI gives all the tweets/ retweets of the ID who the user follows through 
+    the timeline service.
+    -  The TimeLine service gets the input from the Tweet Processor which in turn gets the input
+    from the KAFKA which gets the inputs from the Tweet Ingestion Service. Once the tweet is 
+    received by the Tweet Processor, it finds out the the followers of the user by querying to the
+    Graph Service who made the tweet and thereby populates the timeline service which will then work 
+    to populate the Home TimeLine of the Followers. 
+
 
 
 
