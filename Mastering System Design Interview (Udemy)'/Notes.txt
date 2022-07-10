@@ -464,7 +464,7 @@ High Level Design:
     - The Drivers Connects to multiple services via Web Socket Handlers (Servers) and the 
     websocket handler:driver mapping is stored in WebSocket Manager. The same is also
     stored in a redis cluster. The Redis Cluster contains the mapping of d:h, i.e, which
-    driver gets connected to which host. 
+    driver gets connected to which Socket Handler. 
     - The Drivers:WebSocket Handler Connects to the Location Service as well which
     populates the data in a Cassandra DB such that it can store an ever growing information 
     of the driver's location. The Location Service is also connected to the Maps Service 
@@ -479,7 +479,7 @@ High Level Design:
     queries the Cab Finder which in turn queries the Location Service. The Location Service 
     in turn queries the Map Service and the Map Service takes the Customers Latitude and 
     Longitute and searches the Driver on a certain segment and its adjoining segment and provides
-    a list of available drivers BACK to the Cab Finder Service. The cab finder service in turn
+    a list of available drivers back to the Cab Finder Service. The cab finder service in turn
     queries a Driver Priority Engine to assign a suitable driver for the customer. If the 
     customer is a premium customer, than the Driver Priority Engine would provide the best Driver
     of the lot. If it is a normal customer, then the Driver Priority Engine will Broadcast the 
@@ -493,7 +493,7 @@ High Level Design:
     payment calculation can happen over a MYSQL. 
     - Also to mitigate the No Driver Found Issue, the Analytics can communicate the Drivers 
     regarding sparse Driver Zone. Also Spark ML jobs can run to feed the Driver Priority Engine and 
-    Customer Clssification (Premium or Regular). Driver Profiling and User Profiling. 
+    Customer Clssification (Premium or Regular), Driver Profiling and User Profiling. 
     - The Analytics can also run a fraud detection algorithm, where in if a driver books a
     drive from his own car, then it should be marked as fraudulent based on the consistent latitude
     and longitude of the customer's contact and the driver's contact. 
@@ -511,7 +511,7 @@ Functional Requirements:
 
 Non-Functional Requirements:
     - Read Heavy - More People sees tweet than post
-    - Fast Rendering - Tweets should be able to rendered to the read user pretty fast. 
+    - Fast Rendering - Tweets should be able to be rendered to the read user pretty fast. 
     - Fast Tweet - Tweets should be promptly uploaded
     - Lag Okay in some cases - The Tweets can be taken some time to be visible to the users who
     are reading it. 
@@ -526,14 +526,14 @@ Non-Functional Requirements:
 Type of Users Classified in Twitter:
     - Famous Users: Celebrities, Politicians, etc
     - Active Users: Users who have used Twitter in the last 3 days
-    - Live Users: Users who have are presently accessing Twitter
+    - Live Users: Users who are presently accessing Twitter
     - Passive Users: Users who are neither celebrities nor active users
     - Inactive Users: Users who have gone through soft delete state.
 
 User Onboarding Design:
     - The User Onboarding and Login happens through a User Service. Any User/Users information
     is fetched through the User Service. The User Service sits on top of a MySQL user db. The 
-    choice of DB is SQL because even though the user size is great, it will still be finite. 
+    choice of DB is SQL because even though the user size is large, it will still be finite. 
     There is also a Redis Cache connected to the User Service. Incase the information about 
     a certain user is fetched, it will first search the redis, and if information is not found, 
     then it will do a read operation on the SQL database. 
@@ -555,7 +555,7 @@ User Onboarding Design:
     Active, the information is sent through KAFKA to the User Service and the status of that
     user is subsequently updated. 
     
-Tweet Process:
+Tweet Design:
     - When an User tries to post a tweet, it passes through a Load Balancer and hits the Tweet
     Ingestion Service (TIS). The TIS is used only for POST based Call.
     - Incase the Tweet contains multimedia files then it will be passed through an Asset Service
@@ -579,6 +579,37 @@ Tweet Process:
     received by the Tweet Processor, it finds out the the followers of the user by querying to the
     Graph Service who made the tweet and thereby populates the timeline service which will then work 
     to populate the Home TimeLine of the Followers. 
+    - The Redis being an in-memory database, only handles the tweets for the live or to certain
+    extent, the active users. But incase a Passive User comes online, then the Timeline Service
+    queries the User Service and the Graph Service first. It gets all the ids the passive User
+    follows, then it proceeds to the Tweet Service to query the ids and the tweets over a 
+    timeline and consequently poulates the timelines for the Passive Users while storing the 
+    tweets in the redis.
+    - For the Live users, once they are already on the app, further query from redis will not
+    take place. Alternately the Tweet ingestion service will send messages to Kafka and that will
+    create a live web-socket notification and that will directly populate in the user's app. 
+
+Search Design:
+    - The Tweet Ingestion Service communicates with KAFKA and that in turn communicates
+    to a Search Consumer Service(write) which after transformation stores it in Elastic Search DB.
+    - When a Search for a particular tweet is made, it communicates with a Search Service(read) and 
+    that in turn fetches the information from the Elastic Search. 
+    - For a trending search, it is prudent to cache the search in redis and not search Elastic 
+    Search all the time. Hence a search once made is kept in redis for certain amount of time, 
+    and the same subsequent search when arriving at the search service is queried directly 
+    from redis and not Elastic Search again.
+
+Analytics Design:
+    - The Tweet Ingestion Service communicates with KAFKA and that in turn communicates
+    to a Spark streaming Service. It can extract the top 10 words that have been used in the last
+    n hours (after removing stop words) and find out the trending words.
+    - The databases that can be used here is redis. The list of trending words can be extracted
+    from redis to a User's UI. 
+    - The trends can also be Geographic. 
+    - For Passive Users, customized popular tweets can be made as a part of cron and sent out
+    to those users, so that they can start tweeting again. This will use a notification 
+    service which takes the information from the user service and sends the email to the 
+    recipients. 
 
 
 
