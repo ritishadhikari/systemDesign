@@ -401,7 +401,7 @@ The High Level Design is like:
     through another KAFKA based service. The rate limiter service checks the number of messages passing 
     at a specified duration. It uses redis in the backend to increment the counter. The Request Counter 
     Service checks the number of requests coming from the subscription service. It does not put a limit 
-    on the rate, bit it auto-increments the bill per requests made. This too uses a redis in the backend 
+    on the rate, but it auto-increments the bill per requests made. This too uses a redis in the backend 
     for increasing the request count. 
     - After the rate limiter/request counter service, comes the Notification Handler and User
     Preference Service which limits the number of requests we can make to a particular user and
@@ -544,13 +544,13 @@ User Onboarding Design:
         - Type
         - Last Access Time
     - A User Follow API is connected through a Load Balancer to a Graph Service which will
-    have the logic to find the Followers and Following of a Particualr User. The Graph Service
+    have the logic to find the Followers and Following of a Particular User. The Graph Service
     sits on top of a MySQL Cluster which is sharded and also connects to a Redis Cluster. When
     ever a request is made through an UI, the Graph Service first queries the Redis DB and tries
     to find the followers and following. If the redis does not have the information stored, 
     then it queries the sharded MYSQL DB. 
     - The Third Service which can be used is to provide Analytics on users (users who spends time
-    more on a particular tweet). The repsonse from the analytics service can be sent to KAFKA
+    more on a particular tweet). The reonse from the analytics service can be sent to KAFKA
     - For Live Users, User Live WebSockets (Notifications) are created, and once the User becomes
     Active, the information is sent through KAFKA to the User Service and the status of that
     user is subsequently updated. 
