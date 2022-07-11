@@ -611,6 +611,68 @@ Analytics Design:
     service which takes the information from the user service and sends the email to the 
     recipients. 
 
+Topic: Facebook System Design 
+
+Functional Requirements:
+    - POST (Image, Text and Videos)
+    - Like, Comment or Share on a post
+    - Add Friends (Bi-Directional Relationship)
+    - See Timeline
+    - See a User's Post, Profile
+    - Activity Logs for every Users
+
+Non-Functional Requirements:
+    - Read Heavy
+    - Fast Rendering, Posting
+    - Lag is Okay
+    - Access Pattern -> High Usage for a specific period, followed by diminishing Activity
+    - The Userbase, the Hardwares are and should be globally scalable.
+    - Scale 
+        - 1.7 Bil Daily Active Users -> 95% use mobile to access
+        - 2.6 Bil Monthly Active Users -> 95% use mobile to access
+        - Events/min:
+            - 150K images
+            - 300K statuses
+            - 500K comments
+
+Type of Users Classified for Facebook:
+    - Famous
+    - Active 
+    - Live
+    - Passive
+    - Inactive
+
+Introductory Design:
+    - An User Onboarding API adds new users. It communicates to a User Service to update the 
+    information which in turn is stored in a MYSQL Database. The information is also cached in a 
+    Redis Database. When some query is required for user/users, it is queried to Redis first and 
+    if the response is not received, then the query happens in the MYSQL DB. Also for user
+    validity check and other notification services for the Users, the information is sent through 
+    Kafka.
+    - An Add Friend API adds new Friends. It connects to a Graph Service which provides friendship
+    weightage, etc and the information is stored in a MySQL cluster. The same information regarding
+    user details and their friends are also stored in a Redis DB. The Redis DB also contains the 
+    following information:
+        - User ID
+        - User Details
+        - Friends
+        - User Types 
+        - Relevance Tags : This is powered by an analytics service which provides valuable information
+        on which friends are keen to watch which tags.
+        - Last Access Time
+    - The Add Post API communicates with a Post Ingestion Service. If the user posts a link, a 
+    URL shortener service is used. If a User Posts a Video/Image, then the Access Pattern Analytics
+    is invoked to verify the photo/videos engagements. Incase the engagement is high, it is stored 
+    in Content Delivery Networks. If the engagement is low or has come down, then the content is 
+    transferred from CDN to S3 bucket. If there is an engagement on an old content (Pic/Video), the 
+    content is once again pulled from S3 bucket to CDNs.
+    - The Textual Contents from the Post Ingestion Service are saved in Cassandra DB since there will 
+    be a significantly large number of posts. Also these posts are put in KAFKA for doing classification
+    Machine Learning on what label the post is. Once the ML performs the classification, the 
+    classification result is then posted to a Post Processor Service, which takes the User ID and the 
+    ML result. It then connects with the Redis DB and shortlists those friend profiles of the Users
+    who has an interest on the post (Relevance Tags). 
+
 
 
 
