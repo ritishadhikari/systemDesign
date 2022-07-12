@@ -642,7 +642,7 @@ Type of Users Classified for Facebook:
     - Passive
     - Inactive
 
-Introductory Design:
+Design:
     - An User Onboarding API adds new users. It communicates to a User Service to update the 
     information which in turn is stored in a MYSQL Database. The information is also cached in a 
     Redis Database. When some query is required for user/users, it is queried to Redis first and 
@@ -672,6 +672,60 @@ Introductory Design:
     classification result is then posted to a Post Processor Service, which takes the User ID and the 
     ML result. It then connects with the Redis DB and shortlists those friend profiles of the Users
     who has an interest on the post (Relevance Tags). 
+    - A particular user can view either his someone else's profile or his own timeline. Incase he visits 
+    someone else's profile, it calls the timeline service, and which in turn queries the posts service 
+    which gets the data from cassandra and displays it back. 
+    - If a User wants to check her/his timeline, it queries the TimeLine Service, which in turn queries
+    User and Group Service to get the user's friends. The user's friend is fetched and then the contents of 
+    those friends is fetched throuh Redis through timeline service which gets the data from redis. 
+    The redis will only contain the information for the user's normal friends. To get the information about
+    the Celebrity friends a user has, the posts are queried through the post service which in turn queries
+    the Cassandra DB. Hence for normal friends, the posts are queries through Redis, while for Celebrity
+    friends, the users are queried through Cassandra. The posts of the famous users are then persisted
+    in Redis for few minutes along with the normal users and then once the time out takes place, the 
+    Post Service again used.  
+    - To repopulate the timeline of the Live Users, the post processor which queries the users and group 
+    service, gets information about the live users and for new feeds sends information through another
+    Kafka Topic to a Live User Service, which in turn creates a Live Web Socket and feeds the live content
+    through the User App/ Web.
+    - Since Redis is an in memory DB, the older timeline that it contains needs to be populated to 
+    a permanent storage. So a Cassandra DB is populated with users older time lines through an Archival
+    service which contains the previous information. In case a user wants to see older timeline, than 
+    once redis's timeline for the particular user is exhausted, it queries the Cassandra Time Line DB, 
+    which contained time line in the format : {'u1':[e1,e2,etc],'u2':[e2,t4,etc]}. 
+    - While creating the timeline cassandra db, we have to be careful with partitioning the Cassandra DB
+    carefully as this might create a Hotspot. We must not partition by date range as the recent dates
+    will create hotspots. We might want to create partition by user id or some more reasonable key.
+    - The Like/Comment UI is powered by a Like Service and a Comment Service respectively. The
+    likes of a particular post Id IS stored generally as: 
+    {postID:4,'originalUid':2, likeDetails:{likeUid:[2,3,4]}} in a Cassandra Db. The count of number of 
+    likes is powered by Redis because for recent posts, the count of the likes for a particular post is 
+    showcased real time by Redis. Whenever a Like is added, it gets posted into Kafka for analytics.
+    - The Comment Service like Like Service is stored in Cassandra DB. The format is:
+    {postID:4,originaUid:2,commentDetails:[{commentUid:1,comment:'Hi'},{commentUid:4,comment:'Hello'}]}. 
+    This will not take the benefits of redis as the comments are not shown real time unless any
+    specific user wants to check on the comments. That time it will be retrieved from the Cassandra DB.
+    Whenever a Comment is added, it gets posted into Kafka for analytics
+    - The Kafka Uses an Activity tracker Service and loads the data into Cassandra. It stores the 
+    activity of the users' activity. For example if a user id 3 has liked uid 4's post, then a 
+    document might get stored as: {activityUid:3,activity:'like',postId:4,OriginalUid:2}. 
+    If a user wants to check someone else' activity, than it will be fetched from the activity cassandra 
+    db. 
+    - The Search Service gets the information from Kafka and it stores all the contents in an Elastic
+    Search DB which in turn uses for searching and displaying the contents to the users. While a Person
+    is searching for a particular information, that can be pushed into KAFKA and then the same can 
+    be logged by activity tracker.
+    - The output from the Kafka is used to run a Spark Streaming Job and thereby profile Users based on
+    their likes to posts, their comments on certain posts, identify trends, etc. After User Profiling is
+    completed, these users are marked through relevance tags and are fed only those posts from their 
+    friends who upload posts, which is in synchrony to the users post's classification. 
+    - The Graph weight job provides a weightage of friendship for a particular user with its list
+    of users. Suppose a UId 1 has friends with UID 2,3,4 and 5. But UID 1 seems to like 90% of UID 5's 
+    post, but seems to like only 10%, 20% and 40%  of UID 2, 3 and 4's post. Then the graph weight will
+    give a must higher friend weight for UId1:UId5 w.r.t. UId2:UId3 and the rest. 
+    - Various monitoring, alerting mechanisms needs to be integrated with the databases and clusters so
+    that the non functional requirements are preserved.
+    
 
 
 
