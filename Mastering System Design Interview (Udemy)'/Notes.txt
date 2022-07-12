@@ -677,13 +677,13 @@ Design:
     which gets the data from cassandra and displays it back. 
     - If a User wants to check her/his timeline, it queries the TimeLine Service, which in turn queries
     User and Group Service to get the user's friends. The user's friend is fetched and then the contents of 
-    those friends is fetched throuh Redis through timeline service which gets the data from redis. 
+    those friends is fetched through Redis through timeline service which gets the data from redis. 
     The redis will only contain the information for the user's normal friends. To get the information about
     the Celebrity friends a user has, the posts are queried through the post service which in turn queries
-    the Cassandra DB. Hence for normal friends, the posts are queries through Redis, while for Celebrity
+    the Cassandra DB. Hence for normal friends, the posts are queried through Redis, while for Celebrity
     friends, the users are queried through Cassandra. The posts of the famous users are then persisted
     in Redis for few minutes along with the normal users and then once the time out takes place, the 
-    Post Service again used.  
+    Post Service is again used for querying Cassandra..  
     - To repopulate the timeline of the Live Users, the post processor which queries the users and group 
     service, gets information about the live users and for new feeds sends information through another
     Kafka Topic to a Live User Service, which in turn creates a Live Web Socket and feeds the live content
@@ -697,7 +697,7 @@ Design:
     carefully as this might create a Hotspot. We must not partition by date range as the recent dates
     will create hotspots. We might want to create partition by user id or some more reasonable key.
     - The Like/Comment UI is powered by a Like Service and a Comment Service respectively. The
-    likes of a particular post Id IS stored generally as: 
+    likes of a particular post Id is stored generally as: 
     {postID:4,'originalUid':2, likeDetails:{likeUid:[2,3,4]}} in a Cassandra Db. The count of number of 
     likes is powered by Redis because for recent posts, the count of the likes for a particular post is 
     showcased real time by Redis. Whenever a Like is added, it gets posted into Kafka for analytics.
@@ -725,7 +725,7 @@ Design:
     give a must higher friend weight for UId1:UId5 w.r.t. UId2:UId3 and the rest. 
     - Various monitoring, alerting mechanisms needs to be integrated with the databases and clusters so
     that the non functional requirements are preserved.
-    
+
 
 
 
