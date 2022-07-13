@@ -676,14 +676,14 @@ Design:
     someone else's profile, it calls the timeline service, and which in turn queries the posts service 
     which gets the data from cassandra and displays it back. 
     - If a User wants to check her/his timeline, it queries the TimeLine Service, which in turn queries
-    User and Group Service to get the user's friends. The user's friend is fetched and then the contents of 
-    those friends is fetched through Redis through timeline service which gets the data from redis. 
-    The redis will only contain the information for the user's normal friends. To get the information about
-    the Celebrity friends a user has, the posts are queried through the post service which in turn queries
-    the Cassandra DB. Hence for normal friends, the posts are queried through Redis, while for Celebrity
-    friends, the users are queried through Cassandra. The posts of the famous users are then persisted
-    in Redis for few minutes along with the normal users and then once the time out takes place, the 
-    Post Service is again used for querying Cassandra..  
+    User and Group Service to get the user's friends. The user's friend is fetched and then the contents 
+    of those friends is fetched through Redis through timeline service which gets the data from redis. 
+    The redis will only contain the information for the user's normal friends. To get the information 
+    about the Celebrity friends a user has, the posts are queried through the post service which in turn 
+    queries the Cassandra DB. Hence for normal friends, the posts are queried through Redis, while for 
+    Celebrity friends, the users are queried through Cassandra. The posts of the famous users are then 
+    persisted in Redis for few minutes along with the normal users and then once the time out takes place, 
+    the Post Service is again used for querying Cassandra..  
     - To repopulate the timeline of the Live Users, the post processor which queries the users and group 
     service, gets information about the live users and for new feeds sends information through another
     Kafka Topic to a Live User Service, which in turn creates a Live Web Socket and feeds the live content
@@ -727,6 +727,56 @@ Design:
     that the non functional requirements are preserved.
 
 
+Topic: YouTube/NetFlix/Prime/Hotstar System Design
+Functional Requirements:
+    - Upload Videos
+    - User's HomePage + Search
+    - Play Videos
+    - Support all Devices
+Non Functional Requirements:
+    - No Buffering (Low Latency + High Availability)
+    - User's Session Time (Will increase with Low Latency + High Availability and Good Recommendation 
+    Service)
+
+Incase there are i number of file formats in videos, j number of device's dimensions and k number of 
+bandwidth available to stream the service, then the total number of combinations to be handled becomes 
+very large, i.e., i*j*k. 
+
+The factors to consider are:
+    - Clients: Various Devices which has softwares to run the videos
+    - Users: Various Human Users who will be watching the videos through the clients
+    - Production Houses: Human users/ Companies who will be uploading the videos.
+
+The Clients has Adaptive BitRate Streaming features, where in they may request video of a high quality
+from the server and based on the amount of chunks of the content it receives from the server at a 
+given time, it may vary the magnitude of the request. 
+
+Production House Upload System Design:
+    - Whenever an User/Production House wants to upload their videos, it is sent through to a Load
+    Balancer to an Asset Onboarding Service(AOS). The AOS starts pulling the video from the source 
+    and starts uploading it into S3. The metadata of the video that is being uploaded into S3 is 
+    saved into a Cassandra DB, wherein all the relevant information like uID, S3 file path, 
+    content name, content size are all stored. 
+    - When the file is uploaded into Amazon S3, AOS sends out a Notification via KAFKA and its job
+    ends.
+    - The Content Processor Service then takes the information out from Kafka, and prepares
+    the raw file that has been uploaded into S3. 
+        - The CP Service first creates chunks of the original raw file through a file chunker
+        - The Content Filter than analyses individual chunks for: Piracy, Nudity and Legal Clearances.
+        - Once the above stage is passed, the Content Tagger then tags individual chunks and 
+        providies a Thumbnail for individual chunks.
+        - The Transcoders then converts individual chunks into multiple formats for the individual
+        chunks
+        - The Quality converted then converts the formats for individual chunks into multiple 
+        quality. {chunk:1, attributes: {format: 'mp3', q: {quality:'high'} }}
+        - Post that the video chunks are put into CDN
+        - The information is sent through to KAFKA where in Spark Streaming is carried out and 
+        all the information about the Contents, Formats, and Quality are then aggregated though 
+        a MapReduce Functionality. 
+        - While the File Chunker is sending back messages to KAFKA, an Asset Service takes the 
+        details of the chunks and stores it into Cassandra DB.
+        - Once the process is completed, the KAFKA sends out a notification service, through which
+        the Uploader gets the notification, that the Upload was successful or not.
 
 
 
