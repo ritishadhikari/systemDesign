@@ -778,5 +778,41 @@ Production House Upload System Design:
         - Once the process is completed, the KAFKA sends out a notification service, through which
         the Uploader gets the notification, that the Upload was successful or not.
 
-
-
+User System Design:
+    -   A User Logs in through a User Device Login Flow which goes through a Load Balancer and hits
+    the User Service. The User Service Sits on top of a MYSQL Database and also has a Redis Server 
+    for caching mechanism. The User Service while retrieving the information of the user and the user's
+    present log in details sends out to KAFKA for analytics, one of them can be to understand whether
+    users are sharing password or not (different locations). 
+    - After the Login, the user Reaches the Home Screen UI, from wherein they can search a video
+    and that is powered by the search service. Few Analytics are made through an Analytics Service and
+    they are sent to Kafka. 
+    - Once a User Logs in and searches for a Video, the Video name gets connected to a Host Identity
+    Service (HIS). The HIS searches for the Video in the Cassandra DB which is connected to an Asset
+    Service which gives the information about the CDN the video resides on. 
+    - The video might be located in a Main CDN or it might be located in a Local CDN. The job 
+    of the HIS is to connect to the respective CDN for getting the content as searched by the user. 
+    - The Stream Stats Logger Service calculates the duration an user watches a Video and thereby 
+    sends information to KAFKA which might be used to do Analytics on the like/dislike of certain 
+    videos
+    - For end to end Video Search from Uploader to Consumer, the Asset Service which has information
+    about the files/videos and streams it on KAFKA the same is consumed by a Search Consumer Service
+    which contains information about the age limit, etc about the video and stores the information 
+    on an elastic Search. When a user queries through a search service, it queries the Elastic Search
+    Cluster to retrieve the information about the movie. Now incase he wants to play the movie, 
+    it connects to the HIS which goes to the Asset Service, which plays the Video through a particular
+    CDN.
+    - The tags which were being generated for individual chunks were sent to Spark Streaming though 
+    Kafka. The Spark Streaming Service would do a reduce by operation and would aggregate the results
+    of all the tags and classify the entire chunk of the video. It will then be sent to the KAFKA
+    where by the document of the entire video gets updated. 
+    - Cassandra is used to store all the metadata information about the videos, because it can store 
+    massive amounts of data. For example, for 1 Billion YouTube Video, it will have roughly 1 Trillion 
+    Chunks. Storing 1 Trillion Records is no Big Deal for Cassandra. 
+    - Another Spark Analytics that can be used is segragating Thumbnails as per Users Like on the 
+    Thumbnails. If there are more than one good thumbnail, it can be used to classify which user should 
+    be shown which thumbnail, through Machine Learning App. 
+    - Various Recommendation Services can be run for users, based on their watch time and then predicting
+    how much rating he/she would have given to that movie of a particular genre. Incase the user would
+    have given a high rating, he/she would be recommended another similar genre movie for viewing which
+    he has not watched yet. 
