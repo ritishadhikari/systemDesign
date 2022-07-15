@@ -792,7 +792,7 @@ User System Design:
     Service which gives the information about the CDN the video resides on. 
     - The video might be located in a Main CDN or it might be located in a Local CDN. The job 
     of the HIS is to connect to the respective CDN for getting the content as searched by the user. 
-    - The Stream Stats Logger Service calculates the duration an user watches a Video and thereby 
+    - The Stream Statistics Logger Service calculates the duration an user watches a Video and thereby 
     sends information to KAFKA which might be used to do Analytics on the like/dislike of certain 
     videos
     - For end to end Video Search from Uploader to Consumer, the Asset Service which has information
@@ -816,3 +816,21 @@ User System Design:
     how much rating he/she would have given to that movie of a particular genre. Incase the user would
     have given a high rating, he/she would be recommended another similar genre movie for viewing which
     he has not watched yet. 
+    - Traffic Predictor ML can be run to load data into local/main CDNS through the same 
+    spark streaming Analytic Services. 
+    - CDN Writer Service looks for all the videos in S3 or Main CDNs and loads it into the local
+    CDNs. The strategy to load is not load all the copies from S3/MDCDNs all at once into each
+    LCDNS, but to decentralize the distribution process. Incase there are 20 chunks to be 
+    distributed to each of the LCDNs from S3, then S3 will distribute 20/m copies in each of the 
+    LCDNS and once all the 20 Chunks have been distributed to all the LCDNs combined, then the 
+    LCDNs starts to distribute the chunks among themselves. This way, S3 does not become a single
+    point of failure, also the price to pay for S3 becomes significantly lower.
+    - Whenever a User searches for a specific movie which is very popular at the time of searching,
+    the search travels from the user's laptop to the modem to the router to the ISP's router after 
+    a certain hop and then it connects to the Streaming Platform. The Streaming Platform then 
+    searches for the file in its CDN or in its S3 bucket. This entire process can give way to a lot 
+    of latency. To minimize the Latency, any popular movie can be cached in the premise of the 
+    ISP and when an User queries for the same, the ISP can directly serve the content to the user, 
+    rather than reaching the Video Content Provider thereby decreasing latency. The Video content 
+    provider for their Competitive Advantage may place the Hard Disk for caching to the ISPs with 
+    no extra cost for the ISPs. 
