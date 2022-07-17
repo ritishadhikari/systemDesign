@@ -834,3 +834,73 @@ User System Design:
     rather than reaching the Video Content Provider thereby decreasing latency. The Video content 
     provider for their Competitive Advantage may place the Hard Disk for caching to the ISPs with 
     no extra cost for the ISPs. 
+
+Topic: Zoom/ Webex/ Whatsapp/ FB Video Call:
+
+Functional Requirements:
+    - 1 on 1 calls
+    - Group calls
+    - Audio/ Video/ Screen Share
+    - Record
+
+Non Funtional Requirements:
+    - Super Fast Streaming as it is a Live Call
+    - High Availability
+    - Data Loss is Okay
+
+In a TCP world, all the information that are sent from Client to The server is in the form of
+a Packet with a Packet Number. TCP tries to be a lossless protocol. It tries to the best of its 
+abilities to make sure that there is no data loss between a client and a server. And whereever it
+figures out that there is a potential data loss, i.e., it did not get an acknowledgement for a 
+particular packet, it tries to replay that. Also on the server side, it tries to arrange all of the 
+packets in the same order in which they were supposed to be based on the packet number, and then 
+sends it back to the application. 
+
+Congestion Control is another activity performed by TCP. It makes sure it does not send too many 
+packets at one go therefore not overwhelming the network with a lot of packets. Also header
+size of TCP is 20 bytes which is a considerable size.
+
+In an UDP world, the UDP keeps on sending the payload, irrespective of whether the server is getting
+it or not. Hence data transfer in UDP is significantly less as compared to in TCP. The header size
+of UDP is 8 bytes, which is significantly lesser than that in TCP. UDP is therefore a lossy 
+protocol, but it will be faster than a TCP. 
+
+Only the Video transfer will happen through UDP, while all the other transfers like call 
+establishing, etc will happen with TCP.
+
+The calls are established with U1 and U2 through Web Socket Handlers when both parties are online,
+else some notification is provided to the caller about the user's offline status. 
+
+Web Socket Handlers usage increases Network Latency. Hence to combat that, call with UDP is 
+established, where in the public IP address of both the parties are only needed to instantiate 
+the connection. 
+
+Incase of Zoom, there is a connector service, where in when user wants to join a bridge, it informs
+the connector service about its IP address, while the other user also informs the same connector
+service about its IP address, and if the bridge id is common for both the users, than an UDP 
+connection is established.  
+
+For devices connected through IPV4, they are internally connected through Private IP addresses. 
+Hence when they wants to get connected to the connector services, they must get their public
+ip address from their ISP providers in the format A.B.C.D:port, where in A.B.C.D is the IP address
+of the router, and the port is the port number of the device that it is connected with the 
+router. 
+
+Incase of symmetric NAT, where a call can be established by only the connectors and not through
+the user devices (Connector can only pass on information from A.B.C.D:port1 to A.B.C.D:port1) while
+User 1 whose public IP was A.B.C.D:port1 cannot talk to User 2 directly whose public IP was 
+A.B.C.D:port2.
+
+To get through the above scenario, a call server model is called on through a WEBRTC protocol which
+is Web Real Time Communication. 
+
+Web Socket Handler is known as Signalling, Connector Server is called as STUN server and 
+Call server is called TURN. 
+
+For Group Calls, the the service is divided into two parts:
+    - Small Group (User Size <=5 Members)
+    - Large Group (User Size > 5 Members)
+
+When a User has to communicate information in a group of n member size, he has to communicate the
+same information to (n-1) users, thereby eating a lot of bandwidth. To get away with this problem,
+the call server is utilized, where in the hosts bandwidth is saved.
