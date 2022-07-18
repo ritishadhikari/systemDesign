@@ -904,3 +904,47 @@ For Group Calls, the the service is divided into two parts:
 When a User has to communicate information in a group of n member size, he has to communicate the
 same information to (n-1) users, thereby eating a lot of bandwidth. To get away with this problem,
 the call server is utilized, where in the hosts bandwidth is saved.
+
+Encryption happens end to end at the start of the call. Hence any hacker cannot intercept the call
+in between. 
+
+High Level System Design:
+    - Every User talks with a Web Socket Handler and the information about user:host is kept by 
+    web socket manager. The Web Socket manager sits on top of redis and a persistent disk - to make it 
+    fault tolerant.
+    - The call initiation activity is performed by a Signalling Service. It uses the user service 
+    in the backend, to get the information about the user datails of the called and the calling party
+    and then decides whether the call should happen. If the call can happen, then it informs the 
+    web socket handler of the calling party, whether the called party can answer or not. 
+    - Also during call establisment, the Connector STUN server is used to fetch the public IP details
+    of the called and the calling party. 
+    - Incase of a Symmetric NAT, a STUN Server or a Call Server is used to orchestrate the 
+    communications with both the parties. 
+    - During a Call if the bandwidth capacity changes, then the communications happens through the 
+    web socket handler and the signalling service. 
+    - While the Change in bandwidth happens during a call, the information is put out by the 
+    Signalling Service to KAFKA to an Analytics Engine. 
+    - For recording purpose, the TURN server while sending the packets to the recipient users, also
+    saves the same packets through a Logger Service in a Distributed File System like Hadoop or S3. 
+    - When a call gets terminated, the Signalling Service send out an event through KAFKA to to a 
+    File Creator Service which is also dealing with the aggregation of the packets of information
+    from Logger Service before putting it in S3. Once the File Creator Service gets the information 
+    about the meeting's termination status, it accumulates and stores the entire packet into one 
+    in S3. 
+    - The file Creator Service after storing the information in S3, would use a Notification service
+    to inform the users about the call recordings. 
+    - For a Group Conversation a Transcoding Service is used by the Call Server. Incase there are
+    three users U1, U2 and U3 and U3 has a low internet bandwidth compared to U1 and U2. In this
+    scenario, the Call Server will take the help of the trancoder service and lower the bandwidth 
+    of the HD videos coming from U1 and U2 and going to U3. The video which is arising from U3 are 
+    sent in the original Low Definition format from U3 to U1 and U2. 
+    - Incase a peer to peer conversations gets updated to a Group Conversation, than the system should
+    be intelligent enough to decipher and transfer the call from the Connetor-STUN server to Call
+    Server-TURN server by taking the information from the signalling service. 
+
+For a Live Stream Event, when ever an Information Packet is sent to a Call Server, the Video 
+Information is first broken down into specific codes which can be used by various devices and passed
+on to different call servers based on Geography. Now these call servers will have packet info 
+of various codec and they are further distributed into call servers based on a particular codec
+and they in turn provides content directly to the users devices. This Call servers must be located 
+as near possible to the end users consuming these feed. 
