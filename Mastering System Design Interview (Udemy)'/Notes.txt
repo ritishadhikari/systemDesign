@@ -948,3 +948,37 @@ on to different call servers based on Geography. Now these call servers will hav
 of various codec and they are further distributed into call servers based on a particular codec
 and they in turn provides content directly to the users devices. This Call servers must be located 
 as near possible to the end users consuming these feed. 
+
+Topic: Google Maps:
+
+Functional Requirements:
+    - Identify Roads
+    - Distance & ETA b/w 2 points
+    - Plugable
+Non Functional Requirements:
+    - High Availability
+    - Good Accuracy
+    - Not too Slow
+    - Scale:
+        - 1 Billion Monthly Active Users (Roughly 5-10 Billion Requests per month)
+        - 5 Million Companies 
+
+Ideology of Dynamic Programming is required to solve such use cases:
+
+Segment is a small area where we can easily operate on with. We should be in a position to calculate
+whether a user falls under a certain segment. 
+
+There will be a directed weights between two points as Time Taken will be different to cover two
+directions. 
+
+There will be a calculated edge between two points which will say that the shortest path between 
+two points is 2000 seconds and the points are A-B-C.
+
+To handle distance between points which is not a junction, we calculate the nearest distance of the
+junctions between the sourcw and also the nearest distance of the junctions from the destination. Then
+we calculate the nearest distance from the source junctions and the destination junctions crosses. 
+Once we identify the nearest junction distance, we then add the distance from the points to the 
+juntions (both source and destinations) and get the nearest distance. 
+
+To traverse inter segments, we use the shortest distance of the two exits from a segment to connect
+two segments. 
