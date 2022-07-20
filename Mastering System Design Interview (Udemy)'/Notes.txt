@@ -981,4 +981,47 @@ Once we identify the nearest junction distance, we then add the distance from th
 juntions (both source and destinations) and get the nearest distance. 
 
 To traverse inter segments, we use the shortest distance of the two exits from a segment to connect
-two segments. 
+two segments.
+
+For travelling intercity, there might be thousands of segments, and that will be twoo complicated
+to run at runtime. Hence we create mega-segments and we calculate the distance of the start point 
+to the exit of the megasegment to the entry and and exit of the subsequent mega segments.  
+
+Weights to consider for an Edge:
+    - Distance between two points
+    - Under Normal set of Conditions, time to reach from A to B
+    - Average Speed
+
+A good design should not entail addition of new features, plus each change should be small enough.
+Hence the weghts must not contain traffic and weather information as predictions. Those can be 
+attributes. 
+
+Incase previous users time to reach Point A to Point B takes t mins on an average, then traffic 
+data may not be used for predicting average speed. Incase users time is not available, then traffic
+can be used for predicting the average time. 
+
+Suppose initially it was recommended to follow a path -> SE1->A->B->C->SE2 to reach from point SE1->SE2
+based on the weights of the Time. Now incase the time increases significantly fpr path A and B based on 
+the activities of the real time users, than the shortest path between A and SE2 is calculated which may
+or may not include point C. 
+
+Architecture System Design to keep track of Users Movement who is not using Map Service extrinsically:
+    - When ever location is turned on in a device, location ping is sent from the device every few seconds
+    - If the user is static, the location ping may be sent considerably at an increased frequency vis-a-vis
+    while an user is in transit. 
+    - Each active device is connected to a Web Socket Handler and the information about the device:handler
+    configuration is preserved by Web Socket Manager. The Web Socket Manager stores the information in 
+    Redis.  
+    - The location of the users are captured by location service which keeps the information in a cassandra
+    database. The location pings are also queued through Kafka. 
+    - Once the location of users comes from Kafka into Spark Streaming, it is used for the following
+    services:
+        - Roads Job (New): Incase there is a movement by a lot of people over a segment not captured
+        in the map db earlier, than that road can be added by sending the information back to Kafka and 
+        thereby using the Map Update Service which uses the Graph Processing Service and updates in into
+        Cassandra. The new road added will be part of the segment which will be used to calculate the time 
+        and distance between points and potentially become the shortest path.
+        - Average Speed Job: The average speed of the users over a particular path are calculated and are sent
+        via Kafka to a Traffic Update Service and this can be utilized in a Graph Processing Service and 
+        finally into Cassandra. This average speed can be a deciding factor on selecting that road as 
+        a part of a segment while calculating the shortest path. 
