@@ -887,7 +887,7 @@ of the router, and the port is the port number of the device that it is connecte
 router. 
 
 Incase of symmetric NAT, where a call can be established by only the connectors and not through
-the user devices (Connector can only pass on information from A.B.C.D:port1 to A.B.C.D:port1) while
+the user devices (Connector can only pass on information from A.B.C.D:port1 to A.B.C.D:port2) while
 User 1 whose public IP was A.B.C.D:port1 cannot talk to User 2 directly whose public IP was 
 A.B.C.D:port2.
 
@@ -902,7 +902,7 @@ For Group Calls, the the service is divided into two parts:
     - Large Group (User Size > 5 Members)
 
 When a User has to communicate information in a group of n member size, he has to communicate the
-same information to (n-1) users, thereby eating a lot of bandwidth. To get away with this problem,
+same information to (n-1) users, thereby consuming a lot of bandwidth. To get away with this problem,
 the call server is utilized, where in the hosts bandwidth is saved.
 
 Encryption happens end to end at the start of the call. Hence any hacker cannot intercept the call
@@ -913,7 +913,7 @@ High Level System Design:
     web socket manager. The Web Socket manager sits on top of redis and a persistent disk - to make it 
     fault tolerant.
     - The call initiation activity is performed by a Signalling Service. It uses the user service 
-    in the backend, to get the information about the user datails of the called and the calling party
+    in the backend, to get the information about the user details of the called and the calling party
     and then decides whether the call should happen. If the call can happen, then it informs the 
     web socket handler of the calling party, whether the called party can answer or not. 
     - Also during call establisment, the Connector STUN server is used to fetch the public IP details
@@ -975,7 +975,7 @@ There will be a calculated edge between two points which will say that the short
 two points is 2000 seconds and the points are A-B-C.
 
 To handle distance between points which is not a junction, we calculate the nearest distance of the
-junctions between the sourcw and also the nearest distance of the junctions from the destination. Then
+junctions between the source and also the nearest distance of the junctions from the destination. Then
 we calculate the nearest distance from the source junctions and the destination junctions crosses. 
 Once we identify the nearest junction distance, we then add the distance from the points to the 
 juntions (both source and destinations) and get the nearest distance. 
@@ -983,7 +983,7 @@ juntions (both source and destinations) and get the nearest distance.
 To traverse inter segments, we use the shortest distance of the two exits from a segment to connect
 two segments.
 
-For travelling intercity, there might be thousands of segments, and that will be twoo complicated
+For travelling intercity, there might be thousands of segments, and that will be too complicated
 to run at runtime. Hence we create mega-segments and we calculate the distance of the start point 
 to the exit of the megasegment to the entry and and exit of the subsequent mega segments.  
 
@@ -1001,7 +1001,7 @@ data may not be used for predicting average speed. Incase users time is not avai
 can be used for predicting the average time. 
 
 Suppose initially it was recommended to follow a path -> SE1->A->B->C->SE2 to reach from point SE1->SE2
-based on the weights of the Time. Now incase the time increases significantly fpr path A and B based on 
+based on the weights of the Time. Now incase the time increases significantly for path A and B based on 
 the activities of the real time users, than the shortest path between A and SE2 is calculated which may
 or may not include point C. 
 
@@ -1053,13 +1053,12 @@ Architecture System Design when User wants to commute from Point A to Point B:
     top of its own Cassandra Database.
     - Once the route is calculated, the information is passed back through the Maps Service to the User Device
     Navigation. 
-    - The information from the Navigating Tracking Service and Third Party Data is compared through a third
+    - The information from the Navigation Tracking Service and Third Party Data is compared through a third
     Party accuracy analyser, to ascertain that the information that are shared by third party companies
     are accurate.
     - Incase a user is supposed to reach a particular junction, then  through Spark Streaming and Voice 
     Service, the user can be informed about the portential turn he/she must take.
-    - Analytics is done how predicting the Expressed ETA and the actual ETA of the users from point A
+    - Analytics is done on predicting the Expressed ETA and the actual ETA of the users from point A
     to point B.
     - User Profile Analytics can also be inferred. Incase a person visits a lot of pubs, then he can be 
     recommended a new pub. 
-    - 
