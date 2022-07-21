@@ -1025,3 +1025,41 @@ Architecture System Design to keep track of Users Movement who is not using Map 
         via Kafka to a Traffic Update Service and this can be utilized in a Graph Processing Service and 
         finally into Cassandra. This average speed can be a deciding factor on selecting that road as 
         a part of a segment while calculating the shortest path. 
+        - Hot Spot Identifier: In case of a meeting at a particular road, that road might be full of traffic, 
+        and hence an alternate route may be calculated. 
+        - Road Classifier: Through Spark ML streaming, roads can be classified as a 2-3-6 lane, etc and they
+        will be updated through Kafka to a graph processing service and into Cassandra. 
+        - Vehicle Identifier: Based on the speed and moving pattern of the vehcicle, vehicles can also
+        be classified incase the vehicle in which the user is travelling has not been explicitly 
+        mentioned.
+
+Architecture System Design when User wants to commute from Point A to Point B:
+    - When ever user provides from and to destination, the Area Search Service converts the location name
+    into its corresponding latitude and longitude. 
+    - When ever the person is travelling from point A to point B, the Navigation Tracking Service is 
+    used to keep track of the persons momentary latitude and longitude and is sent back to Kafka for 
+    analysis.
+    - When ever an user searches for the direction, the Map Service helps to provide the preliminary
+    UI and information to individuals and companies regarding rates and journey details.
+    - The Map Service connects to the graph service for showcasing the journey path. The Graph service 
+    takes information from the Segments service which sits on top of a Cassandra. Incase the two points
+    lies in the same segment, the graph service might process the distance with out the aid of an 
+    external service, else the Graph Service accesses another Cassandra DB to access the entry and exit points
+    of the segments, and calculates the shortest path. The Graph service also takes in information from 
+    third party data manager, which provides information about the conditions of a specific road at runtime
+    for the Graph Processing service to make effective decisions. 
+    - To calculate the ETA, the Graph Processing Service queries the Historical Data Service which stores
+    information about the average users ETA over a particular path. The Historical Data Service sits on 
+    top of its own Cassandra Database.
+    - Once the route is calculated, the information is passed back through the Maps Service to the User Device
+    Navigation. 
+    - The information from the Navigating Tracking Service and Third Party Data is compared through a third
+    Party accuracy analyser, to ascertain that the information that are shared by third party companies
+    are accurate.
+    - Incase a user is supposed to reach a particular junction, then  through Spark Streaming and Voice 
+    Service, the user can be informed about the portential turn he/she must take.
+    - Analytics is done how predicting the Expressed ETA and the actual ETA of the users from point A
+    to point B.
+    - User Profile Analytics can also be inferred. Incase a person visits a lot of pubs, then he can be 
+    recommended a new pub. 
+    - 
