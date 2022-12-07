@@ -3,3 +3,6 @@ Design Fundamentals:
     - Key Characteristics of Systems
     - Actual Components of the Systems
     - Actual Tech
+
+Client Server Model:
+    - 
