@@ -1,0 +1,5 @@
+Design Fundamentals:    
+    - Foundations Systems Design Knowledge
+    - Key Characteristics of Systems
+    - Actual Components of the Systems
+    - Actual Tech
