@@ -4,5 +4,41 @@ Design Fundamentals:
     - Actual Components of the Systems
     - Actual Tech
 
-Client Server Model:
-    - 
+Network Protocols:
+    - Internet Protocol
+        - All information stored in bytes
+        - Header:
+            - Anywhere between 20 and 60 Bytes
+            - Source IP Adress
+            - Destination IP Adress
+            - Total Size of the Packet
+            - Version of the Internet Protocol (4 or 6)
+        - Data:
+            - Information that one machine is sending to another
+            - One IP data can send a max 2^16 bytes or 0.65 MB
+            - Hence multiple IP packets are used to send large data 
+    - Transmission Control Protocol:
+        - Built on top of the Internet Protocol
+        - Meant to send IP packets in an ordered way
+        - Reliable that all packets will be received
+        - Allows to send arbitrarily long pieces of data to other machines
+        - Apart from the conventional header, TCP also contains TCP Header
+        - Header:
+        - TCP Header:
+        - Data: 
+        - A TCP connection is setup with source and destination servers through handshake
+    - HyperText Transfer Protocol:
+        - Protocol that is built on top of TCP 
+        - Introduce a higher level abstraction above TCP and IP
+        - With HTTP, we completely forget about IP packets, we forget about TCP
+        - All that we care about are HTTP requests and responses
+        - HTTP Requests consists of the following schema:
+            - host
+            - port
+            - method
+            - headers
+            - body
+        - HTTP Response consists of the following schema:
+            - status code
+            - headers
+            - body
