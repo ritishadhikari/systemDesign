@@ -42,3 +42,8 @@ Network Protocols:
             - status code
             - headers
             - body
+
+Key Value Store:
+    - Useful for caching
+    - Lowered Latencies and Improved Throughputs
+    - 
