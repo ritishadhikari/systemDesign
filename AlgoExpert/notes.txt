@@ -46,4 +46,25 @@ Network Protocols:
 Key Value Store:
     - Useful for caching
     - Lowered Latencies and Improved Throughputs
-    - 
+    - Some Key Value Stores data into disk while others might write data into memory
+
+Specialized Storage Paradigm:
+    - Blob Store:
+        - Binary Large Object
+        - Any Arbitrary piece of unstructured data is a Blob
+        - GCS/S3/Azure Blobe Storage
+        - Behave like key value store
+    - Time Series Database:
+        - Data which are all related to data
+        - Used for Monitoring, IOT, Stock Prices, etc
+        - Influx DB and Prometheus
+    - Graph Database:
+        - Built on top of the Graph Data Model
+        - Neo4J
+        - Useful in Social Networks Facebooks, Youtube, etc
+    - Spatial Database:
+        - Locations on a Map
+        - Google Maps
+        - Quadtree has either 0 children nodes or no children nodes (leaf)
+        - Specialized Databases for Spatial data or Mongo/PostGres can be deemed fit
+    
