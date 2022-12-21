@@ -68,3 +68,11 @@ Specialized Storage Paradigm:
         - Quadtree has either 0 children nodes or no children nodes (leaf)
         - Specialized Databases for Spatial data or Mongo/PostGres can be deemed fit
     
+Replication and Sharding:
+    - Replica needs to be updated with the main database in a synchronous way
+    - Splitting up the data from the main database into a bunch of little databases is called Sharding
+    - Hotspots are the phenomenon where certain shards gets a lot more traffic than other shards
+    just by the nature of the store
+    - In case of Hotspots, using replicas is more meaningful than consistent hashing as the shards
+    which might go down will not be able to serve in the future
+    - Use a Reverse Proxy with a Shard to decide where the data should go to
