@@ -94,3 +94,8 @@ Leader Election:
     algorithm. Under the hood, it implements Raft consensus algorithm.
     - Multiple servers need to be communicating with etcd and at any given point in time, one 
     special key-value pair in the etcd would be elected as the leader.
+
+Configuration:
+    - Two primary types of Configurations:
+        - Static 
+        - Dynamic
