@@ -99,3 +99,13 @@ Configuration:
     - Two primary types of Configurations:
         - Static 
         - Dynamic
+    
+Rate Limiting:
+    - Setting a threshold on certain operations past which this operations will return errors
+    - If you don't rate limit certain operations in a system, you run the risk of your system be
+    brought down by malicious actors
+    - DOS: Denial of service attacks. When a bad actor floods the system with a bunch of request
+    bringing the system down.
+    - Rate Limiting can help prevent that from happening, i.e., DOS attacks. 
+    - Rate limit on IP address, Geography, etc
+    - 
