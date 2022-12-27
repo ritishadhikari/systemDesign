@@ -108,4 +108,10 @@ Rate Limiting:
     bringing the system down.
     - Rate Limiting can help prevent that from happening, i.e., DOS attacks. 
     - Rate limit on IP address, Geography, etc
-    - 
+    - A Distributed Denial of Service Attack tries to circum-navigate rate limiting by having
+    a bunch of different machines that might not be identifiable as part of the same organization, 
+    same group having all of this machines inundate with traffic.
+    - In case of DDOS, we don't keep track of rate limiting in servers, but in a separated service 
+    or database so that all our service are able to speak to. 
+    - Use Redis for rate limiting
+    - Use tiers for rate limiting like 1 hits per 0.5 seconds but not more than 10 times a minute
