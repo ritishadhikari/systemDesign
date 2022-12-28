@@ -115,3 +115,12 @@ Rate Limiting:
     or database so that all our service are able to speak to. 
     - Use Redis for rate limiting
     - Use tiers for rate limiting like 1 hits per 0.5 seconds but not more than 10 times a minute
+
+Logging and Monitoring:
+    - A timeseries database is preferred for building monitoring metrics than building directly from logs
+    - Monitoring Databases includes: 
+        - InfluxDB
+        - Prometheus
+    - Tools that are used for querying Databases are:
+        - Graphana
+    - 
