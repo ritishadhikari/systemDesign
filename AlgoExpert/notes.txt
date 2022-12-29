@@ -123,4 +123,18 @@ Logging and Monitoring:
         - Prometheus
     - Tools that are used for querying Databases are:
         - Graphana
-    - 
+
+Publish/Subscribe Pattern:
+    - As soon as we deal with distributed systems, we need to deal with persistent storage.
+    - Four Entities:
+        - Publishers: Servers. Channels of Specific Information. They Publish data to the topics
+        and not the subscribers
+        - Subscribers: Clients those were originally listening for data. Subscribes to the topic as
+        opposed to the publisher
+        - Topic:
+        - Message:  Some operations that will be relevant to the subscribers and the subscribers will be 
+        listening for
+    - All the messages that are going to be published to topics are going to be effectively stored in 
+    persistent storage in those topics.
+    - Messages are guaranteed to be delivered atleast once to the subscribers who are listening the topic
+    - The subscribers acknowledges those messages from the topic
