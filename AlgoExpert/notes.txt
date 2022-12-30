@@ -143,4 +143,10 @@ Publish/Subscribe Pattern:
     - An Idempotent operation is an operation that has the same ultimate outcome, regardless of how many
     times it is performed.
     - More often than not, we might not want to perform a non-idempotent operation 
-    - 
+    - Messages will be in the form of a queue, what goes in the topic first, will be sent to the subscribers 
+    first
+    - Different types of data might get published to different topics
+    - Examples:
+        - Apache Kafka
+        - Google Cloud Pubsub
+        - 
