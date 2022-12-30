@@ -138,3 +138,9 @@ Publish/Subscribe Pattern:
     persistent storage in those topics.
     - Messages are guaranteed to be delivered atleast once to the subscribers who are listening the topic
     - The subscribers acknowledges those messages from the topic
+    - If the acknowledgement is not made from behalf of the subscribers, then messages from the topic will be
+    delivered multiple times to the same subscriber
+    - An Idempotent operation is an operation that has the same ultimate outcome, regardless of how many
+    times it is performed.
+    - More often than not, we might not want to perform a non-idempotent operation 
+    - 
