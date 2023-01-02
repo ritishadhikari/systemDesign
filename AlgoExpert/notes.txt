@@ -149,4 +149,42 @@ Publish/Subscribe Pattern:
     - Examples:
         - Apache Kafka
         - Google Cloud Pubsub
-        - 
+
+Security And HTTPS:
+    - Man in the Middle Attack (MITM): Security breach with HTTP
+    - HTTPS: Hypertext Transfer Protocol with Security to prevent Man in the Middle Attack
+    - Encrypted Data from the Client should be able to be decrypted by a particular party, i.e., 
+    servers
+    - Symmetric Key Encryption: Relies on Symmetric Algorithms. Single key to both encrypt and decrypt.
+    - Symmetric Key uses Advanced Encryption Standard (AES).
+    - Symmetric Encryption is faster than Asymmetric Encryption.
+    - One key has to be shared between two parties in symmetric encryption 
+    - There can still be a MITM attach if the key is forwarded by the client to the server along with the 
+    data to the server. Hence Symmetric Encryption alone does not solve the vulnarability issues.
+    - Assymetric Key Encryption is also known as public key encryption. It relies on two keys to encrypt and 
+    decrypt messages
+    - Pair of keys are generated togather. One is the public key and another is the private key. 
+    - Both the keys are generated through a mathematical algorithm which is complex
+    - Messages which is going to be encrypted by the public key can only be decrypted by the private key.
+    - Private key resides with the server while public keys are distributed to the pool of clients. 
+    - HTTPS runs on top of Transport Layer Security (TLS). With HTTPS, communication is encrypted 
+    through TLS. 
+    - Secured Socket Layer (SSL) protocol is the predeccesor to TLS.
+    - When there is a communication between a Client and a Server, they first goes through a TLS handshake.
+    - CHello from client-> SHello, SSL Certificate (Public Key coming from Public Private Key Pair from server) 
+    -> Encrypt PreMasterSecret(client to server) Encrypted Message using the Public Key -> Server Decrypts
+    the premasters secret which is the only entity to have the private key and Generate sessions by having 
+    the same symmetric keys
+    -> SSL certificates are prone to be hijacker by MITM hackers as they may replace the servers public
+    key with their own public key and the encryption of the PMS from the client can be decrypted by the 
+    MITM's Private key and hence hijack the client's data
+    -> Hence the client needs the trust, that the public key is really coming from the server.
+    -> SSL certificates are certificates that are granted by trusted party called certificate authority
+    (CA) to the servers to the servers
+    -> The certificate is a digital item that the Certificate Authority have signed and that serves to 
+    assure that the client that is going to rely on the certificate that the server is who they say 
+    they are.
+    -> The client will use the public key of the certificate authority which is signed by the third party.
+    -> For ex., client like Google Chrome will have the public keys of all the major certificate authorities
+    stored in it, such that it can verify all the SSLs it is going to be getting from various servers 
+
