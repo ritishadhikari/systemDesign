@@ -187,4 +187,3 @@ Security And HTTPS:
     -> The client will use the public key of the certificate authority which is signed by the third party.
     -> For ex., client like Google Chrome will have the public keys of all the major certificate authorities
     stored in it, such that it can verify all the SSLs it is going to be getting from various servers 
-
