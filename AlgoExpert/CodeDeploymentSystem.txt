@@ -1,0 +1,42 @@
+Is it a build only system or a Build and Test System?
+
+Assume the testing is already covered, but Build it on a global scale.
+
+When is the code build and deploy going to happen? 
+
+Assume when the push is going to happen in a master branch, then automatically build and deploy
+is going to happen.
+
+Code needs to be deployed globally, with machines spread across 5-10 regions globally with 100s of 
+machines deployed across those regions
+
+All build must be deployed within 30 minutes and the availability must have 2-3 nines, i.e., downtime
+of 2-3 days in Total
+
+Deployment is like that of in a large company, where deployment will be done thousands of times in a day
+
+Build size per build can reach upto 10GBs
+
+Separating the two processes:
+        - Building Code:   
+            - Build will be in the form of a Queue
+            - The First Commit will be the first to be deployed
+            - The binary will be built on the workers
+            - Once the Binary is built, it is stored in storage like a Blob Storage, ex. GCS.
+            - The Queues of commits will be processed in pool of servers which would run those jobs
+            - The output of those jobs in the form of binary will be stored in GCS bucket
+            - The job details will be stored in SQL table which will be used to deque the next job 
+            - The fields in the job table should be: 
+                - id
+                - name of the binary which will be referenced to a GCS bucket
+                - time of creation of the job
+                - time of merger with the master branch (SHA)
+                - status of build : Succeed or Failed
+            - The choice of SQL is because, it will uphold the acid properties and the distributed
+            workers will be able to select the right job as per time of creation thereby maintaning
+            concurrencies
+            - BEGIN TRANSACTION; SELECT * FROM JOBS WHERE STATUS = "QUEUED" ORDER BY CREATED_AT
+             ASC LIMIT 1; UPDATE jobs SET STATUS = "RUNNING" WHERE CREATED_AT IN (SELECT MIN(CREATE_AT) 
+             FROM jobs WHERE STATUS ="QUEUED")
+        - Deploying Code:
+            
