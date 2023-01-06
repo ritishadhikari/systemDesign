@@ -37,6 +37,10 @@ Separating the two processes:
             concurrencies
             - BEGIN TRANSACTION; SELECT * FROM JOBS WHERE STATUS = "QUEUED" ORDER BY CREATED_AT
              ASC LIMIT 1; UPDATE jobs SET STATUS = "RUNNING" WHERE CREATED_AT IN (SELECT MIN(CREATE_AT) 
-             FROM jobs WHERE STATUS ="QUEUED")
+             FROM jobs WHERE STATUS ="QUEUED"); COMMIT;
+            - Rollback the Transaction if no active QUEUED job is found 
+            - Make Indexing on Status and Created at Table 
+            - When will these workers actually execute these deque operation:
+                
         - Deploying Code:
             
