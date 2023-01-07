@@ -32,6 +32,7 @@ Separating the two processes:
                 - time of creation of the job
                 - time of merger with the master branch (SHA)
                 - status of build : Succeed or Failed
+                - Last Heart Beat: HearBeat sent from the worker nodes to the Auxiliary service
             - The choice of SQL is because, it will uphold the acid properties and the distributed
             workers will be able to select the right job as per time of creation thereby maintaning
             concurrencies
@@ -41,6 +42,36 @@ Separating the two processes:
             - Rollback the Transaction if no active QUEUED job is found 
             - Make Indexing on Status and Created at Table 
             - When will these workers actually execute these deque operation:
-                
+                - When the workers are done building a code, that time they will query the table for 
+                subsequent jobs
+                - Incase there are 100 workers free, and 20 workers goes to the database every 5 seconds,
+                that can be handled preety well by SQL Databases
+            - What happens when a worker building code and power cut happens?
+                - Healthchecks on workers needs to be carried out frequently so as to ensure that they
+                are healthy. The Healthchecks needs to be carried out by an auxiliary service
+                - The Last Heart Beat value gives the indication whether the worker node is active or it is 
+                dead, while carrying out with the job
+                - Through another SQL job, if the HeartBeat Time exceeds a certain time, the job will again 
+                be updated to queued 
+            - 5000 builds per day and 15 mins taken by 1 worker, so in one hour 1 worker will build 4
+            builds and in 1 day approx 100 builds so in total 5000/100=50 workers will be required
+            which has to be horizontally scalable as the build will be non-uniformly distributed during
+            the business hours
+            - Once the build is complete, the blob stored info is saved in the GCS bucket and consequently
+            the row in the database table is updated to completed
+            - For replication of the blob storage, n numbers of regional blob storage will be set up and
+            once a worker is free it can take up new jobs, meanwhile the replication to the regional 
+            blob storage can happen through peer to peer networks
+            - Deployment of the code should only be done once the replication is complete over all the
+            regional buckets:
+                - A separate service to check whether the specific build name is replicated over all the 
+                regional buckets and if the aggregate count satisfies, then update the status into
+                a particular service. 
         - Deploying Code:
-            
+            - An engineer presses a button to deploy the build
+            - The download of the successful build to the thousands of servers for build spread across 
+            10 regions will happen through a peer to peer network for faster downloads
+            - The response from the button contains the build version in a key-value store and once the 
+            key is pressed, it flows to the individual region and the machines which are keeping track 
+            of the centralized regional metric, begins downloading the new versions incase the metric
+            is different then what they currently have.
