@@ -74,4 +74,4 @@ Separating the two processes:
             - The response from the button contains the build version in a key-value store and once the 
             key is pressed, it flows to the individual region and the machines which are keeping track 
             of the centralized regional metric, begins downloading the new versions incase the metric
-            is different then what they currently have.
+            is different then what they currently have. 
