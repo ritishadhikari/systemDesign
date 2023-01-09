@@ -1,0 +1,49 @@
+AlgoExpert has the home page, code execution platform, purchases, etc. Are we going to design everything 
+or the code execution engine only?
+
+Only focus on the core code execution engine: User gets into the website, selects a question, solves it 
+and marks itself as complete. Systems Expert and other products can also be skipped.
+
+Since it is a paid product, there should be some level of availability but having said that, it is not 
+a mission critical product, hence 8 hours to 2-3 days in a year downtime is reasonable, hence 2-3 9's
+is fine.
+
+We need focus on the latencies for the code execution engine. We need to try between 1-3 seconds of run 
+code. 
+
+Few Hundred thousands user will use the code execution engine every month and the scale should be such
+that it is able to support 10K concurrent users at a given time.
+
+The server should be available globally with US and India being the top two geographies.
+
+Users should be able to save their code and data in the website. The home page will be a static page. 
+
+The API has to be robust and there will be database which will store user related information which
+will be pulled once the user logs in.
+
+The design can be broken down into the following phases:
+    - UI Static content:
+        - Home Page will have Java Script Bundles
+        - Can be stored in Blob Stores like GCS or S3
+        - Content Delivery Network should be used to serve the static content both in India and the US, 
+        ex. GC CDN or Cloud Flare can be used
+        - A CDN load balancer to be used for load balancing the content based on the request from 
+        region served
+        - A path based Load Balancing will be set up in each region to satisfy individual function's
+        requests
+        -  Access Control List API service to handle core requests per users based on the Authorization.
+        For example paid users will be shown all the videos but free users won't.
+    - Auxilliary services like Payments, Authorization and Videos (to be skipped)
+    - Core User actions: Seeing Questions, Writing code, seeing other users answers, etc
+        - 
+    - Running the Actual Code:
+        - Static Questions list to be present in the GCS Bucket
+        - If a User selects a Question, an ACL check is carried out and based on the check, the 
+        question editor page is loaded
+        - Client side caching of questions can be done in advance, so that the questions need not be 
+        loaded from GCS bucket every time
+        - Suppose there is 5000 bytes of data per language and if there are 10 languages, so it makes 
+        50000 bytes per question and 50k*100 bytes = 5000000 = 5M bytes for 100 questions = 5 MBs
+        - So caching of 5 MBs of data can be done without a problem.
+
+
