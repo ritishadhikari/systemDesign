@@ -73,6 +73,25 @@ The design can be broken down into the following phases:
                 on both uid and qid
                 - Incase the number of languages increases from 7 to say 20, then an additional indexing
                 for language can be implemented so as to fix the performance issues
-                - 
+                - The Databases will be set up based on the regions and they will be updated with
+                another asynchronously. For. Ex. US customers will hit the US database while
+                India customers will use the India Database
 
-
+    - While submitting the code, we need not think about the security problem. We only need to 
+    worry about the Operating System
+    - From the path based load balancer once user is logged in and submits the code into the server, 
+    the server must handle rate limiting for users who might try to bring the platform down by 
+    making a Denial of Service attack
+    - Rate Limiting can be tier based, such that it is once per second, 3 times per 10 seconds and 
+    a max of 5 times per minute
+    - Rate Limiting can be accomplished with a Key-Value store like Redis
+    - Once the Rate Limiting Server passes the user's code, separate bunch of servers can execute the
+    code
+    - A seperate load balancer can be set up to ensure a server which is already running an 
+    execution, does not receive additional execution requests.
+    - If there are 10k workers working on the code, then assuming a user hits the run button 
+    3-4 times an hour, so there will be at the max 10-100 hits per second, so 10-100
+    number of worker can suffice the code execution requests. 
+    - The number of workers can scale horizontally as well as vertically
+    - Logging and Monitoring as a bonus so that it can give us a suggestions on whether we must 
+    add number of workers in the future.
