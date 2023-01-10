@@ -33,10 +33,6 @@ The design can be broken down into the following phases:
         requests
         -  Access Control List API service to handle core requests per users based on the Authorization.
         For example paid users will be shown all the videos but free users won't.
-    - Auxilliary services like Payments, Authorization and Videos (to be skipped)
-    - Core User actions: Seeing Questions, Writing code, seeing other users answers, etc
-        - 
-    - Running the Actual Code:
         - Static Questions list to be present in the GCS Bucket
         - If a User selects a Question, an ACL check is carried out and based on the check, the 
         question editor page is loaded
@@ -45,5 +41,38 @@ The design can be broken down into the following phases:
         - Suppose there is 5000 bytes of data per language and if there are 10 languages, so it makes 
         50000 bytes per question and 50k*100 bytes = 5000000 = 5M bytes for 100 questions = 5 MBs
         - So caching of 5 MBs of data can be done without a problem.
+        - 30 Mins of Eviction policy of browsed questions for users post log-in from cache 
+        after which the questions will be reloaded from the GCS bucket
+    - Auxilliary services like Payments, Authorization and Videos (to be skipped)
+    - Core User actions: Seeing Questions, Writing code, seeing other users answers, etc
+        - 
+    - Running the Actual Code:
+        - For User posted questions, it should be selected from PostgreSQL 
+        - There can be Two separate activities:
+            - Question Completion Status:
+                - Every User to have 85 rows on a PosGres Table which will consist of the following
+                fields:
+                    - id (row number)
+                    - uid (userid)
+                    - qid (questionid)
+                    - cStatus (completion status)
+                - Since there will be many many users who might also be non paid users, and users
+                will mark the completion status, there might be a lot of rows since there will be
+                all the question rows for all the user, hence to speed up the query, we need to use an
+                index on the uid
+
+            - Question Solutions
+                - Every user to have 85*7 rows, i.e. 85 questions and 7 languages in a postgress Table
+                and will contain the following fields:
+                    - id
+                    - uid
+                    - qid
+                    - lang
+                    - soln
+                - Since Solutions will be filtered on user and questions, hence indexing to be done
+                on both uid and qid
+                - Incase the number of languages increases from 7 to say 20, then an additional indexing
+                for language can be implemented so as to fix the performance issues
+                - 
 
 
