@@ -1,0 +1,79 @@
+What is this platform supposed to support exactly? We should be supporting only buying and selling stocks,
+but are we not supporting trading other securities like derivatives and future, limit losses and
+stop losses, etc.
+
+We are going to support market orders on stocks, which means given a place ordering with our brokerage 
+platform we should try to execute with the exchange as soon as possible regardless of the stock price.
+
+The available balance should be the source of truth for those customers.
+
+No withdrawal and deposit of money will be required here for this design interview
+
+Customers have already deposited funds into our platform. Assume a SQL table with the balance of customers who
+have made the trade.
+
+Scale will be Millions of customers with millions of trades a day and assume the customers are located only 
+in a single region, i.e., the US.
+
+Availabililty should be very high as people can loose a lot of money way to quickly even if it is down for Few
+minutes. 
+
+Design the API call which it would be making at the backend that we are designing. 
+
+The API has to interact with the exchange's API and the response needs to be procure from the exchange once
+the order is either fulfilled or is rejected. 
+
+Assume exhange has highly available API and highly available system so that you callback from the broker API
+will get executed atleast once.
+
+
+- API call
+    - Request: 
+        - Consumer id
+        - Name of the Stock 
+        - Type of Transaction (Buy, Sell, etc)
+    - The fields will contain the following:
+        - Consumer id
+        - Name of the Stock 
+        - Type of Transaction (Buy, Sell, etc)
+        - order id 
+        - Status (placed, completed, rejected, etc)
+            - Initially the status will be placed, once the response comes from the exchange, it will get
+            updated
+            - 
+        - CreatedAt (timeStamp)
+- API servers
+    - The SQL table containing client's balance will be updates once transactions of those specific clients
+    take place
+    - Another SQL table consisting of client's stocks will be created
+    - SQL Table for trades:
+        - will store all the customers
+        - orderId (already generated VARCHAR)
+        - createdAt (SQL TimeStamp)
+        - customerId
+        - stockName
+        - type (buy/sell)
+        - Status (placed, completed, rejected, etc)
+        - status reason (specially for failed orders - outside business hours, not enough balance, etc)
+        - index on customer id and type
+    - SQL Table for Balances
+        - id
+        - customerId
+        - amount
+        - last_m (timestamp when the balance was last modified)
+    - Clients will take to multiple API servers through load balancers 
+    - Round Robin Load balancing should be Okay, as any clients can speak to any servers as well as no caching
+    will be required in the server side
+    - The oldest trade from a customer should be the first one to be executed.
+    - Since the API Servers which takes in the requests does a lot of database read and write, 
+    we will be using some other set of worker servers who communicates with the exchange
+    - Route Customers Trades through a messaging service special topic or special channel for that customer 
+    and the workers will be subscribing to those topics watching for new messages coming in grabbing them 
+    off from those message queues and then workers will talk to those exchanges.
+    - A cluster of workers will only be handling trades for a specific set of cutomers. In other words,
+    a single customer request will be flowing to a specific cluster of workers.
+    - Guranteed atleast once delivery through this messaging system 
+
+- Trade Execution System
+
+
