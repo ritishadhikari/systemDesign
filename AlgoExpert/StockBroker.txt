@@ -1,3 +1,5 @@
+# From Line 81, things are fuzzy. Refer AlgoExpert Notes.
+
 What is this platform supposed to support exactly? We should be supporting only buying and selling stocks,
 but are we not supporting trading other securities like derivatives and future, limit losses and
 stop losses, etc.
@@ -73,7 +75,25 @@ will get executed atleast once.
     - A cluster of workers will only be handling trades for a specific set of cutomers. In other words,
     a single customer request will be flowing to a specific cluster of workers.
     - Guranteed atleast once delivery through this messaging system 
-
+    - Implement Leader election for the workers to handle the pubsub messages from the API Servers
+    - Each Worker Cluster would subscribe to a particular topic
+    - Million trades per day means rougly 30 trades per second considering it is available for 1/3rd of the
+    day
+    - So ideally 30 worker clusters and hence 30 topics will be fine enough, but for the sake of
+    handling load, 100 clusters is the optimal number of topic required for handling individual individual
+    requests per second
+    - If there is an order with status as placed or in_progress, then the query needs to be published in
+    the topic which will reach the worker node.
+    - Query: SELECT * FROM trades WHERE c_id=c AND status IN (placed, in_progress) ORDER BY created_at
+    ASC LIMIT 1;
+    - Once the query is published, the status is changed to in_progress
+    - The response from the exchange will be such that it provides the information about the subsequent
+    status of the message and consequently the message will be popped out from the system
+    - A separate auxiliary service would be updating the databases based on the output from the exchange
+    - For failed response from the exchange, the auxiliary service must update the trade table with the 
+    failed status and failed reason and the balance table with the updated balance and the last_m
+    - The Auxiliary service must respond to the exchange with the 200 message and the exchange must respond
+    the pubsub
 - Trade Execution System
 
 
