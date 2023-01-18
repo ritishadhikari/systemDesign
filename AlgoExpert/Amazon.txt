@@ -1,0 +1,52 @@
+We will be considering the following:
+    - HomePage
+    - Search
+    - Items
+    - Carts
+    - Orders
+    - Cancel Orders
+    - Warehouses
+
+
+We do not have to care about the home page much as it is going to consist just the search box, also we do 
+not have to worry about Multiple Carts, we can have single cart per user. 
+
+We also do not have to worry about the search engine recommendation service and it is going to come 
+out of the box created for us and we just have to figure out where that sub system is going to live in our
+greater design.
+
+We need to keep information about the stock of the items, such that users are not going to order items that
+are not out of stock, and when they do order items that are in stock, that should effectively consume the
+Stock. 
+
+If an item is in stock, any user can see the item and also how many of the items are left on the browsing
+page and any user can add it into the cart.  But once they begin the checkout process and the item 
+is no longer available, they need to be alerted if the item is no longer in stock and if it is in 
+stock, the checkout item should reserve the item for 10 minutes. 
+
+Once an order is submitted, it gets assigned to an amazon warehouse, then it gets assigned to the delivery
+truck or a specific amazon worker
+
+When an order is placed, each items in a specific order might be available in different warehouses, and
+therefore the order needs to be split up. We need to focus on how many stock of the items are present.
+The above Warehouse assignment needs to be taken care by a particular service.
+
+We do not have to worry about the delivery drivers and other poc apart from the warehouses. 
+
+We do not have to worry about multiple warehouses which has the same item, we can use a separate services
+to pick the warehouse, or we can use a round robin technique to select the warehouse
+
+We need to focus on a specific region, ex. amazon.com, but this business will be identical for the other
+regions as well. Hence we have to worry about only amazon.com. 
+
+Item Search should be very fast but we do not need a fast order submission. 
+
+Core Functionality is super important and less about the latencies and high availabilities. 
+
+We will be getting to work on highly available schemas out of the box. 
+
+Amazon serves 300 Million customers, 60000 orders per hour which is close to 20 orders per second
+globally, which will be about 10 orders per second (assumming half the orders are from the US)
+
+
+
