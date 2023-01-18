@@ -48,5 +48,46 @@ We will be getting to work on highly available schemas out of the box.
 Amazon serves 300 Million customers, 60000 orders per hour which is close to 20 orders per second
 globally, which will be about 10 orders per second (assumming half the orders are from the US)
 
+We can have one major relational database at a regional level, where the warehouses and the users are 
+going to interact with this db
+
+There will be APIs which will be interacting with this dbs. The user requests will flow to the API
+servers through Round Robin Load Balancing
+
+Relational Database will consists of the following tables:
+    - Items (One Row represents one item)
+        - Only Item related information needs to be present
+        - Stocks of individual items should not be present, else it will be a write heavy database 
+        -  Schemas
+            - id
+            - name
+            - description
+            - price
+            - image in blob storage
+    - Stock
+        -
+    - Orders (One Row represents one order)
+        - 
+    - Carts
+        -
+
+
+We can split the system into two major part:
+    - Users:
+        - An user calls a method like getItemCatalogue(), takes in a search parameter/string
+        - The API servers defined above is not going to hit the items table directly, but is 
+        going to hit the auxiliary service like searchResultsService() and this service will interact 
+        with the items table directly
+        - The searchResultsService() will contain certain ML/AI algorithms will will come up with the 
+        best items from the items table 
+        - Since the Search functionality should be devoid of latencies, the searchResultsService() should
+        cache responses to popular search queries. Ex. TV, Dining Room Table, etc. 
+        - When searchResultsService() is called, it is going to hit both the items table as well as the stocks
+        table such that it retrives the stock related information from the later table.
+        - If the item is out of stock, addItemToCart() service cannot be invoked.
+
+    - Warehouses:
+        - 
+
 
 
