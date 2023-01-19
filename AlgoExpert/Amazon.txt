@@ -43,7 +43,7 @@ Item Search should be very fast but we do not need a fast order submission.
 
 Core Functionality is super important and less about the latencies and high availabilities. 
 
-We will be getting to work on highly available schemas out of the box. 
+We will be getting to work on highly available ralational database out of the box. 
 
 Amazon serves 300 Million customers, 60000 orders per hour which is close to 20 orders per second
 globally, which will be about 10 orders per second (assumming half the orders are from the US)
@@ -57,19 +57,41 @@ servers through Round Robin Load Balancing
 Relational Database will consists of the following tables:
     - Items (One Row represents one item)
         - Only Item related information needs to be present
-        - Stocks of individual items should not be present, else it will be a write heavy database 
-        -  Schemas
+        - Stocks of individual items should not be present, else it will be a write heavy table 
+        -  Schema
             - id
             - name
             - description
             - price
             - image in blob storage
-    - Stock
-        -
+    - AggregatedStock (Aggregated Stocks across all warehouses)
+        - id
+        - stock (integer)
     - Orders (One Row represents one order)
-        - 
+        - Schema
+            - orderID
+            - customerID
+            - status
+            - items
+            - price
+            - shippingAddress
     - Carts
-        -
+        - Schema
+            - id
+            - items
+    - WarehouseStock
+        - itemID
+        - wareHouseID
+        - physicalStock: Sanity Check on how many physical stock they have at a given moment in their 
+        warehouse
+        - availableStock: When an order is getting assigned, that will consume the available stock
+    - WarehouseOrders:
+        - whOrderID
+        - parentOrderID
+        - whID
+        - orderStatus
+        - items
+        - shippingAddress
 
 We can split the system into two major part:
     - Users:
@@ -83,10 +105,30 @@ We can split the system into two major part:
         cache responses to popular search queries. Ex. TV, Dining Room Table, etc. 
         - When searchResultsService() is called, it is going to hit both the items table as well as the stocks
         table such that it retrives the stock related information from the later table.
-        - If the item is out of stock, addItemToCart() service cannot be invoked.
+        - If the item is out of stock, updateItemInCart() service cannot be invoked.
+        - Once the rows has been added in the Cart table, if the beginCheckout() API is called, the service
+        checks the stocks of the items in the stock table and matches it with the cart values and if the 
+        stock quantity is less, user alert will happen with the items being out of stocks.
+        - If the items is still in stock after the beginCheckout() api is called, the reservation service
+        will be called, it will update the stock table and decrease the stock by 1 or as per the number of
+        the user's order
+        - Once the time of 10 min elapses and the submitOrder() API was not called or the cancelledCheckout() 
+        API is called, then again the AggregatedStock table will be updated back to the old count following 
+        ACID transactions
+        - Once the submitOrder() API is called, then the cart is going to be empty for the specific user,
+        and it is going to write an order to the orders table
+        - When the cancelOrder() API is triggered, it is verified if the order has not been shipped, and 
+        then it will increase the stock's numbers in the aggregated stock
 
     - Warehouses:
-        - 
-
+        - The orderAssignment() service will take the input from the orders table and will connect
+        with the warehouses with smart logics like Machine Learning
+        - It will find a warehouse having the stock of a certain item and that will consume the count
+        from the availableStock column
+        - When a new Stock Appears, it increases the physicalStock column, it will go down, when an item 
+        physically moves out from the warehouse , either shipped or thrown out 
+        - When a new Stock Appears, it also increases the availableStock column, but goes down when 
+        orderAssignment() service is triggered or is thrown out and not when it physically moves out
+        - The orderAssignment() service will write the records to the WarehouseOrders table.
 
 
