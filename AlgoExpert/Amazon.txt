@@ -71,7 +71,6 @@ Relational Database will consists of the following tables:
     - Carts
         -
 
-
 We can split the system into two major part:
     - Users:
         - An user calls a method like getItemCatalogue(), takes in a search parameter/string
