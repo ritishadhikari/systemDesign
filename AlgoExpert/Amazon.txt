@@ -126,7 +126,7 @@ We can split the system into two major part:
         - It will find a warehouse having the stock of a certain item and that will consume the count
         from the availableStock column
         - When a new Stock Appears, it increases the physicalStock column, it will go down, when an item 
-        physically moves out from the warehouse , either shipped or thrown out 
+        physically moves out from the warehouse, either shipped or thrown out 
         - When a new Stock Appears, it also increases the availableStock column, but goes down when 
         orderAssignment() service is triggered or is thrown out and not when it physically moves out
         - The orderAssignment() service will write the records to the WarehouseOrders table.
