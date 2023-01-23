@@ -1,0 +1,58 @@
+Design an API of a Subreddit.
+
+Subreddit is an online community where users can write posts, they can comment on posts, vote on posts,
+they can become moderators, etc. 
+
+Sticking to writing posts, writing comment, upvoting and downvoting.
+
+Need to create the API details for the above functionalities.
+
+UserID and SubredditID will be contained 
+
+The two most Important Functionalities:
+    - Post
+        - Schema:
+            - postID: String (generated on the server side)
+            - creatorID: string
+            - subRedditID: string (since each post will be part of a subredditID)
+            - createdAt: timestamp
+            - votesCounts: Integer
+            - commentsCounts: Integer
+        - Create API
+            - userID: string (at the backend it becomes creator id)
+            - subRedditID: string
+            - title: string
+            - desc: string (description of the post)
+            - Return the entity as the response, i.e. Post
+        - Get API:
+            - postID: string
+            - userID: string
+            - Return the entity as the response, i.e. Post
+        - Edit
+            - userID: string
+            - postID: string
+            - title: string
+            - desc: string
+            - Return the entity as the response, i.e. Post
+        - Delete
+            - postID: string
+            - userID: string (the user ID will be validated by a separate ACL service) 
+            - Return the entity as the response, i.e. Post
+        - List 
+            - Needs to be paginated
+            - userID: string
+            - subReddit: string
+            - pageSize(optional parameter pre-defined by a default value)
+            - pageToken: integer (Reference to know where to start from)
+            - Returns a List of Post, next page token - Integer
+
+    - Comment:
+        - CommentID: string
+        - creatorID: string
+        - postID: string
+        - createdAt: timestamp
+        - votesCount: integer 
+        - content: string
+
+        - the reply option will be bounded by the commentID and the UI should sort the reply based on the 
+        timeStamp when it was created.
