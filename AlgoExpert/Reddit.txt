@@ -9,6 +9,10 @@ Need to create the API details for the above functionalities.
 
 UserID and SubredditID will be contained 
 
+The design will be such that if a comment was intentionally deleted, then the replies won't get
+deleted and the UI will display as like comment was once there but now it is deleted.
+
+
 The two most Important Functionalities:
     - Post
         - Schema:
@@ -18,41 +22,93 @@ The two most Important Functionalities:
             - createdAt: timestamp
             - votesCounts: Integer
             - commentsCounts: Integer
+            - currentVote: enum (optional based on the user logged in)
+            - awardsCount : Awards given to specific posts
         - Create API
             - userID: string (at the backend it becomes creator id)
             - subRedditID: string
             - title: string
             - desc: string (description of the post)
-            - Return the entity as the response, i.e. Post
+            => Return the entity as the response, i.e. Post
         - Get API:
             - postID: string
             - userID: string
-            - Return the entity as the response, i.e. Post
+            => Return the entity as the response, i.e. Post
         - Edit
             - userID: string
             - postID: string
             - title: string
             - desc: string
-            - Return the entity as the response, i.e. Post
+            => Return the entity as the response, i.e. Post
         - Delete
             - postID: string
             - userID: string (the user ID will be validated by a separate ACL service) 
-            - Return the entity as the response, i.e. Post
+            => Return the entity as the response, i.e. Post
         - List 
             - Needs to be paginated
             - userID: string
             - subReddit: string
             - pageSize(optional parameter pre-defined by a default value)
             - pageToken: integer (Reference to know where to start from)
-            - Returns a List of Post, next page token - Integer
+            => Returns a List of Post, next page token - Integer
 
     - Comment:
-        - CommentID: string
-        - creatorID: string
-        - postID: string
-        - createdAt: timestamp
-        - votesCount: integer 
-        - content: string
-
-        - the reply option will be bounded by the commentID and the UI should sort the reply based on the 
-        timeStamp when it was created.
+        - Schema:   
+            - CommentID: string
+            - creatorID: string
+            - postID: string
+            - createdAt: timestamp
+            - votesCount: integer 
+            - content: string
+            - parentID: string (only replies wil have this ID so that it can be joined with the actual
+            parent comment)
+            - the reply option will be bounded by the commentID and the UI should sort the reply based on the 
+            timeStamp when it was created.
+            - isDeleted: bool (if this comment is deleted, then the UI will showcase only the replies of the
+            comment if any)
+            - currentVote: enum (optional based on the user logged in)
+            - awardsCount : Awards given to specific comment
+        - Create API:
+            - userID: string
+            - postID: string
+            - content: string
+            - parentID: string (optional, only valid for replies)
+            => Returns the comment 
+        - Get (Not Required)
+        - Edit (Comes with ACL checks, A user cannot edit B Users comment, Not required as per the design)
+        - Delete (Not Required)
+        - List
+            - Needs to be paginated
+            - userID: string
+            - postID: string
+            - pageSize(optional parameter pre-defined by a default value)
+            - pageToken: integer (Reference to know where to start from)
+            => Returns a List of comments, next page token - Integer
+    - Vote
+        - Schema:
+            - voteID: string
+            - creatorID: string
+            - targetID: string (ID of the post or the comment that this Vote is on)
+            - type: enum UP/DOWN
+        - Create API:
+            - up/down for the first time
+            - userID: string
+            - targetID: string
+            - type: up/down
+        - Edit API: 
+            - create up and then down to edit
+            - userID: string
+            - voteID: string
+            - type
+        - Delete API: 
+            - create up vote twice to delete
+            - userID: string
+            - voteID: string
+    - Buy Award API:
+        - userID: string
+        - paymentToken: string
+        - quantity: Integer
+    - Give Award Entity:
+        - userID: string
+        - targetID: string (which happens to be the commentID)
+        - 
