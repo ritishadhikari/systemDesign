@@ -12,7 +12,6 @@ UserID and SubredditID will be contained
 The design will be such that if a comment was intentionally deleted, then the replies won't get
 deleted and the UI will display as like comment was once there but now it is deleted.
 
-
 The two most Important Functionalities:
     - Post
         - Schema:
@@ -48,7 +47,7 @@ The two most Important Functionalities:
             - Needs to be paginated
             - userID: string
             - subReddit: string
-            - pageSize(optional parameter pre-defined by a default value)
+            - pageSize (optional parameter pre-defined by a default value)
             - pageToken: integer (Reference to know where to start from)
             => Returns a List of Post, next page token - Integer
 
@@ -60,7 +59,7 @@ The two most Important Functionalities:
             - createdAt: timestamp
             - votesCount: integer 
             - content: string
-            - parentID: string (only replies wil have this ID so that it can be joined with the actual
+            - parentID: string (only replies will have this ID so that it can be joined with the actual
             parent comment)
             - the reply option will be bounded by the commentID and the UI should sort the reply based on the 
             timeStamp when it was created.
@@ -107,7 +106,7 @@ The two most Important Functionalities:
     - Buy Award API:
         - userID: string
         - paymentToken: string
-        - quantity: Integer
+        - quantity: Integer 
     - Give Award Entity:
         - userID: string
         - targetID: string (which happens to be the commentID)
