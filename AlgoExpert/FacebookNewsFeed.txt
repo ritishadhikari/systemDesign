@@ -1,0 +1,66 @@
+Facebook News Feed is large feature which has smaller features in it like:
+    - View an Users News Feed
+    - Interact with an users news Feed
+    - Status Updates or posting Status Updates
+    - Refresh a news feed with new posts
+
+We need to focus on the core functionalities of the feeds:
+    - Posting Status
+    - Getting news feed 
+    - Loading/ Updating news feed
+  
+We do not have to worry about the storage of large files, videos, etc also no rankings of the news 
+feeds and Ads
+
+We need to take care of 1 Billion users with 10 Million Status posted everyday.
+
+If there are 1 Billion users and each users loads on average 5 times a day, than there will be 
+5 Billion refresh (news feeds loads) per day.
+
+Assumming each user has 500 number of friends on an average.  
+
+It is okay if the friend of an user who is close to the user sees the post immediately within 
+seconds while a friend who is living is a far geography than the user views the posts after a certain 
+time. So the latency can be between 1 second to 1 minute based on where the user are.
+
+Posts of the users should be persistent and should not be lost, however the system may not be highly
+available.  
+
+There are majorly two actions:
+    - CreatePost
+        - Whenever a Post is created, it is handled by loadbalancer so that it can be passed to the
+        API Servers in a round-robin fashion
+        - The Post is going to be stored in a Relational Database. The API servers are going to store
+        the posts in these Relational Database
+        - 
+    - GetFeed
+        - For getting the feed, the user will be communicating to the copy of the relational database 
+        which stores the post in a sharded manner based on the UserIDs.
+        - The Shards uses the search rank algorithms which constantly pulls the latest news feed of the 
+        friends of the users post so that it can returned when called via the load balancer.
+        - Since the getfeed is a get request, a more consistent hashing Load Balancer is called based 
+        on the users ID wherein the load balancers communicate with the shards to get the top ranked
+        posts for the users.
+        - We can assume the Rank Search Algorithm to be out of the box and is out of scope from this
+        design interview
+        - Billion Users will be storing Billion News Feeds in these shards 
+        - Assumming we get 1000 posts per user feed and each post is worth 10 KB, that makes it 
+        10 MBs of Posts per user 
+        - And if we need to calculate for 1B users, that means 1B*10MB= 10^9 * 10^7=10^16 Bytes
+        which is equivalent to 10 PBs. 
+        - so if each individual shards have 10 TBs of storage, then we will be needing 1000 shards
+        to accomodate 10 PBs of data.
+        - The shards will be stored in disks rather than in memory as some sort of latencies in 
+        getting the feed is acceptable
+        - Incase we are looking into these shards region wise and assumming there are 10 regions, 
+        than we can divide the shard struture into 10 regions where the number of shards per 
+        region can be divided by the number of regions
+        - The databases throughout the region are updated asynchronously through a peer to peer
+        network
+        - In a scenario when the friend of an user posts than the user must be able to see the post
+        immeditately in the page while scrolling down in the existing session
+        - 
+
+
+
+
