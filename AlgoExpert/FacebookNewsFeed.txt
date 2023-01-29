@@ -32,7 +32,24 @@ There are majorly two actions:
         API Servers in a round-robin fashion
         - The Post is going to be stored in a Relational Database. The API servers are going to store
         the posts in these Relational Database
-        - 
+        - The Post which is uploaded to the RDS by the APIs needs to be communicated from the APIs to the 
+        Shards and it can be accomplished by Pub/Subs where in each shards will be subscribed by its own 
+        topics
+        - The post once uploaded will be sent through the Pub/Subs through the hashing machanisms where
+        the hashing will be mapped to the friends of the users shards
+        - To limit the number of notifications for power users, the top 500 friends/followers who
+        were last online will be triggered with the pub/sub topic 
+        - Also if we are considering region-specific, then the number of connections gets limited, and
+        once the asynchronous update happens, than the pub/sub triggerring for the other region w.r.t. 
+        the user's friends also happens.
+        - Here the API has to load the data in the database, than send it to the KAFKA topic
+        - Another best way to offload the load of the APIs is to directly create KAFKA topics for both 
+        RDS loading as well as sending it to the Shards through the user's friends hashings
+        - For other regions, the subscribers of the Databases as well as the relatable shards will
+        subscribe to the topic of the post from the original region and populate its own RDS and the 
+        shards of the user's friends
+        - The Pubsub system gives the replayability of messages incase the message is not sent to the
+        shards or is not stored in the databases, then it can be again called before acknowledging.
     - GetFeed
         - For getting the feed, the user will be communicating to the copy of the relational database 
         which stores the post in a sharded manner based on the UserIDs.
@@ -59,7 +76,7 @@ There are majorly two actions:
         network
         - In a scenario when the friend of an user posts than the user must be able to see the post
         immeditately in the page while scrolling down in the existing session
-        - 
+        
 
 
 
