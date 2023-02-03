@@ -74,4 +74,5 @@ Rest of CRUD Operations:
         in the metadata will be deleted.
         - The Folder containing the Children will have their children removed for that specific file
         - 
-
+    - Get:
+        - Poll the file every 10 seconds through the blobLocation
