@@ -35,11 +35,13 @@ Functionalities:
     - For Key Value Store, we can go for the Etcd or ZooKeeper kind of storage
     - Hash on the OwnerID
     - We create a lot of proxies which passes through Load Balancers and hit the K/V stores
-    - Information in K/V Store:
+    - Information in K/V Store:  # This is also applicable for the files
         - name:
         - ownerId:
         - children: [] # unique IDs
         - isFolder: True
+        - blobLocation=[]
+        - parent: []
 
 Upload File:
     - 15 GB per User and 1B user makes = 1000,000,000* 15 G=  15,000,000,000 GB=15 EB 
@@ -55,4 +57,21 @@ Upload File:
     - The Blob Splitting Service sends the chunks to the proxies which is also cached. The proxies then sends
     the data to the three blob storage simultaneously which resides in different availability zones. 
     - The other remaining Blob storage might be synchronized asynchronously with a separate service. 
+    - Once the blobs have been uploaded, the blobLocation is populated in the metadata of individual files
+
+Download File:
+    - For Downloading, the blobs are revisited through the metadata, they are then recreated and subsequently
+    they are prepared for download.
+
+Rest of CRUD Operations:
+    - Move:
+        - The Parent and the Children will be modified.
+        - The folder from where the file is removed, it will have that children removed
+        - The parent of the files will be updated
+        - The new folder where the file is is getting moved, will have their children added
+    - Deleting:
+        - While Deleting a file, the object will be deleted and subsequently the record of the file 
+        in the metadata will be deleted.
+        - The Folder containing the Children will have their children removed for that specific file
+        - 
 
