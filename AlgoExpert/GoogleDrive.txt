@@ -1,0 +1,58 @@
+Just designing the core product of Google Drive, i.e., the storage aspect
+
+Users can upload and create files, which are stored somewhere in cloud, make an access to those
+files and folders, move them around and replace them. 
+
+We can consider the personal google drive aspect. We can forget about the shared and enterprise
+aspect. Recently Starred Entities and Recently accessed entities can be skipped here. 
+
+Just Handling Folders and Files. 
+
+Must include CRUD operations on Files along with Downloading. 
+
+Just Web and not desktop client. 
+
+If we have multiple files, we can have 10 seconds delay on the updates. 
+
+Users are Billions in numbers and there should be 15 GB of space that would be allocated per user. 
+
+Users are globally distributed. 
+
+There should not be any data loss and it should be a highly available system. 
+
+Functionalities:
+    - Create Folders 
+    - Upload/ Download Files
+    - Move/Delete/Rename/Get - Files and Folders
+
+ A file only has blobs of content along with metadata, whereas Folders only has metadata. 
+
+ The blob storage for Google Drive will be Google Cloud Storage Bucket. 
+
+ For storing MetaData Information, storing in Key-Value pair makes most sense. 
+
+ Create Folder:
+    - For Key Value Store, we can go for the Etcd or ZooKeeper kind of storage
+    - Hash on the OwnerID
+    - We create a lot of proxies which passes through Load Balancers and hit the K/V stores
+    - Information in K/V Store:
+        - name:
+        - ownerId:
+        - children: [] # unique IDs
+        - isFolder: True
+
+Upload File:
+    - 15 GB per User and 1B user makes = 1000,000,000* 15 G=  15,000,000,000 GB=15 EB 
+    - Since availability is a prime objective, hence we would neeed 2 backups plus the primary
+    storage, which makes it 15*3=45 ExaBytes of Data ~~ 50EB
+    - To disallow duplication of upload of images, files which will be uploaded will be broken down into 
+    chunks and will be uploaded as blob storage. If the chunks are already present in the blobs, then the 
+    same file will be refrained from uploading again. 
+    - During the Upload, the file will be routed through a load balancer to the set of API servers which 
+    will split the files into chunks and would place in the main storage along with the replications
+    - We need to use Content Addressable Storage wherein, we create the hash of each blobs and check whether
+    the hash of the blob is already there or not, thereby removing duplicates. 
+    - The Blob Splitting Service sends the chunks to the proxies which is also cached. The proxies then sends
+    the data to the three blob storage simultaneously which resides in different availability zones. 
+    - The other remaining Blob storage might be synchronized asynchronously with a separate service. 
+
