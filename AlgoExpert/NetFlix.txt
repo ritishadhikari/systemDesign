@@ -1,0 +1,63 @@
+Users get into the platform, they are served Video Content, they can watch those video content. 
+
+We are designing the Core Netflix product
+
+Auxiliary services like Authentication, Payments, etc can be ignored.
+
+The product has to take care of various user's activity data, which will be used for product recommendation
+engine. 
+
+The activities will be updated in the background asynchronously.
+
+The system must be highly available and must be globally scalable
+
+Number of users in Netflix: 200 Million spreadout equally around the globe.
+
+We don't need to get into device level details, just concentrate on the distributed systems perspective
+
+Core User Flow (Anything which involves Videos)
+    - We have to take care about latencies, as user would want to stream videos very fast
+    - Storing Videos
+    - Streaming Videos
+    - Data will be in two forms:
+        - Video Data:
+            - Netflix has around 10K number of Videos
+            - Videos has different Video Qualities
+            - Assuming there are two resolutions, SD and HD
+            - Average video length should be 1 hour
+            - Assumming Each SD video is worth 10GB per hour and each HD video is worth 
+            20 GB per hour
+            - So total video size would be = 10*10000 GB + 20*10000 GB = 300000 GB = 300 TB
+            - Considering only 300 TB of data is palatable, we can store them in raw S3 or GCS Bucket
+            - The storage of S3 will be replicated into multiple location
+            - The challenge is to stream these video data without latencies globally
+            - Assuming at peak time 5% of the total Netflix Users are watching Videos at the same time,
+            that corresponds to 10 Million users which is the peak traffic
+            - 10 Million user will be consuming 20 GB per hour = 2=20 EB per hour
+            - which equals 20/4000 per seconds = 5 TBs per seconds bandwidth consumption
+            - This huge volume cannot by a single data center
+        - User Metadata
+            - Which all video has the user watched
+            - What is the duration of the videos watched by the users, etc. 
+            - Lets assume an User watches 2 shows per week, so yearly he will watch = 100 videos
+            - In ten years he will watch 100*10=1000 videos
+            - So User Metadata roughly will be 1000 records per user
+            - 200M*1000 = 200 Billion records
+            - 1 record on an average be 0.1KB
+            - 200 Billion records will be 20B KB = 2 TB
+            - Since this data has to be queried very often, we will be storing the same in relational
+            Databases
+            - The SQL Databases will be sharded into 2-4 shards based on the UserIDs for analysis purpose
+            - 
+        - Static Content:
+            - Names of the Videos
+            - Thumbnails 
+            - Cast of Movies
+            - logs
+            - Each Static content will be mapped to a video and will not consume much space
+            - They can be stored in a relational database or a key-value storage
+
+
+
+Recommendation Engine:
+    - 
