@@ -36,6 +36,14 @@ Core User Flow (Anything which involves Videos)
             - 10 Million user will be consuming 20 GB per hour = 2=20 EB per hour
             - which equals 20/4000 per seconds = 5 TBs per seconds bandwidth consumption
             - This huge volume cannot by a single data center
+            - Hence Content Delivery Network (CDNs) has to be present at various locations, ex. CloudFlare
+            - These CDNs will have multiple point of presence
+            - These CDNs will allow the consumption of videos by so many users at once
+            - We have to ensure the POP (point of presence) has the right data locally
+            - There has to be a asynchronous Queuing Service which populates movies from the blob storage
+            into the CDNs as per the demand in the location the demand in the location
+            - In Reality Netflix partners with the Internet Service Providers and store their contents
+            in this CDNs thereby lowering latencies
         - User Metadata
             - Which all video has the user watched
             - What is the duration of the videos watched by the users, etc. 
@@ -48,7 +56,6 @@ Core User Flow (Anything which involves Videos)
             - Since this data has to be queried very often, we will be storing the same in relational
             Databases
             - The SQL Databases will be sharded into 2-4 shards based on the UserIDs for analysis purpose
-            - 
         - Static Content:
             - Names of the Videos
             - Thumbnails 
@@ -56,8 +63,17 @@ Core User Flow (Anything which involves Videos)
             - logs
             - Each Static content will be mapped to a video and will not consume much space
             - They can be stored in a relational database or a key-value storage
-
-
-
+            - When a video's static content is being displayed, it can be fetched through the API servers
+            which connects the relational databases through Load Balancers 
+            - Since there is only 2 TBs of  static data, we can also implement write through caching policy
 Recommendation Engine:
-    - 
+    - Logs can be stored in a Distributed File System like Hadoop (HDFS)
+    - The logs can be anything from pausing at a certain point in a video, clicking the mouse, etc, 
+    anything which Netflix might feel it as super important
+    - Schema for the logs:
+        - userId: "uid"
+        - event: TYPE (click, pause, etc),
+        - videoId: "videoId"
+    - Implement Map for these logs on an User ID level 
+        - UID1:[("vid1",PAUSE),("vid2",PLAY)]
+    - Implement Reduce or ML/AI on users based on users and score them accordingly.
