@@ -35,7 +35,7 @@ Core User Flow (Anything which involves Videos)
             that corresponds to 10 Million users which is the peak traffic
             - 10 Million user will be consuming 20 GB per hour = 2=20 EB per hour
             - which equals 20/4000 per seconds = 5 TBs per seconds bandwidth consumption
-            - This huge volume cannot by a single data center
+            - This huge volume cannot be handled by a single data center
             - Hence Content Delivery Network (CDNs) has to be present at various locations, ex. CloudFlare
             - These CDNs will have multiple point of presence
             - These CDNs will allow the consumption of videos by so many users at once
