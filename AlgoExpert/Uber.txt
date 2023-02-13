@@ -1,0 +1,45 @@
+Design the Core Uber Ride API
+
+Don't focus on the Create Account, Payments, etc and only focus on the core functionalities. 
+
+Two APIs:
+
+- Passenger Facing API:
+    - When ever an user books the ride, it hits the create ride endpoint
+    - The parameters which contains in the createRide API/DB is:
+        - rideId (unique Identifier) : string
+        - passengedID: string
+        - driverId: string
+        - driverInfo : DriverInf object containing Driver Ratings, Rides taken by the driver
+        etc
+        - estimatedPrice: int
+        - timeValues: what ever time was captured
+        - rideStatus: created/ matched (editing the ride)/ started/ finished/ cancelled
+        - pickup:   
+        - dest:
+    - When ever a createRide() API is created, the driverInfo is not created instantanously and 
+    it calls other API fndDriver() to get the driverInfo while it allocates a driver for this ride
+    - When ever a driver is found the creditRide() API is called with the same rideID that of the 
+    createRide API which updates the record with the driverId
+    - When ever a ride is created witn created rideStatus, it consistently polls to the 
+    findDriver() API, until the findDriverAPI() allocates a driver and calls the editRide() API to update 
+    the database
+    - The cancelRide(userID: string) API is just a wrapper around the editRide() API, where the status 
+    of the ride can be changed to cancelled only if it is in created and matched state.
+    - The getRide(userID: string) is used to get the rides of an user, both active and past rides
+    - The createRide() API can also have the passenger object which can be sent to the findDriver 
+    API such that that the driver can also have a glimpse about the passenger like how mnay stars,
+    how many rides the passenger has taken, etc. 
+    -   
+
+- Driver Facing API:
+    - If the driver set themselves to available and if he/she happens to be in the same area as 
+    the polls coming to the findDriver() API, the driver gets the notification about the ride - 
+    pickup, drop, passenger location, etc.
+    - Driver Status can be: Unavailable, Inride, Available, Standby (available but not in ride)
+    - The SetDriverStatusAPI which contains the following paramaters:
+        - userID: string (authentication token of the driver)
+        - driverStatus: enum
+    - The findrideAPI queues through all the drivers that are in standby status and asynchronously
+    communicates with the findDriver API    
+    - 
