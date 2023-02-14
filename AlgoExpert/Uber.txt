@@ -10,7 +10,7 @@ Two APIs:
         - rideId (unique Identifier) : string
         - passengedID: string
         - driverId: string
-        - driverInfo : DriverInf object containing Driver Ratings, Rides taken by the driver
+        - driverInfo : DriverInfo object containing Driver Ratings, Rides taken by the driver
         etc
         - estimatedPrice: int
         - timeValues: what ever time was captured
@@ -30,7 +30,11 @@ Two APIs:
     - The createRide() API can also have the passenger object which can be sent to the findDriver 
     API such that that the driver can also have a glimpse about the passenger like how mnay stars,
     how many rides the passenger has taken, etc. 
-    -   
+    - Once a rideStatus is matched, the passenger must be able to see the driver's location and 
+    vice versa in real time
+    - For this a long lived Web Socket connection is created, wherein the passenger calls the 
+    streamDriverLocation(userID: string) and the driver consistently pushes his locationW details 
+    when the streaming request arrives.
 
 - Driver Facing API:
     - If the driver set themselves to available and if he/she happens to be in the same area as 
@@ -40,6 +44,22 @@ Two APIs:
     - The SetDriverStatusAPI which contains the following paramaters:
         - userID: string (authentication token of the driver)
         - driverStatus: enum
-    - The findrideAPI queues through all the drivers that are in standby status and asynchronously
+    - The findride() API queues through all the drivers that are in standby status and asynchronously
     communicates with the findDriver API    
-    - 
+    - The first driver has 30 seconds to respond, else the request goes to the next available driver
+    - The driver accepts the acceptRide(userID: string) call made through the findRide() API, and once 
+    he accepts it, the editRide() API is called which changes the ridesStatus to matched from created
+    - When a passenger calls getRide(), they get information which is relevant to them, while When
+    the driver calls a getRide(), the driver gets information relevant to them. 
+    - When ever a ride is completed, the driver invokes the editRide() API and sets their status to 
+    standby. 
+
+- UberPool:
+    - PoolRide() API is created which contains the following parameters:
+        - driverInf0
+        - getRide() objects
+    - The findDriver() API now has to take care of all the clustered location and assign it the 
+    specific drivers using the findride() API
+    - Additionally, the Driver Status can be set to Intransit (additional). Once the capacity is
+    filled, the status of the driver changes to Unavailable
+    - The Driver Can acceptRide() while they are in transit.
