@@ -28,12 +28,12 @@ Two APIs:
     of the ride can be changed to cancelled only if it is in created and matched state.
     - The getRide(userID: string) is used to get the rides of an user, both active and past rides
     - The createRide() API can also have the passenger object which can be sent to the findDriver 
-    API such that that the driver can also have a glimpse about the passenger like how mnay stars,
+    API such that the driver can also have a glimpse about the passenger like how many stars,
     how many rides the passenger has taken, etc. 
     - Once a rideStatus is matched, the passenger must be able to see the driver's location and 
     vice versa in real time
     - For this a long lived Web Socket connection is created, wherein the passenger calls the 
-    streamDriverLocation(userID: string) and the driver consistently pushes his locationW details 
+    streamDriverLocation(userID: string) and the driver consistently pushes his location details 
     when the streaming request arrives.
 
 - Driver Facing API:
@@ -58,7 +58,7 @@ Two APIs:
     - PoolRide() API is created which contains the following parameters:
         - driverInf0
         - getRide() objects
-    - The findDriver() API now has to take care of all the clustered location and assign it the 
+    - The findDriver() API now has to take care of all the clustered location and assign it to the 
     specific drivers using the findride() API
     - Additionally, the Driver Status can be set to Intransit (additional). Once the capacity is
     filled, the status of the driver changes to Unavailable
