@@ -1,0 +1,58 @@
+Overall Storage Overview:
+    - Pictures will use blob Storage
+    - Remaining information will go to SQL setup since they are structured data
+    - Profiles Table (Regional): 
+        - id
+        - name
+        - gender 
+    - Decks Table (Regional):
+        - 
+    - Swipes Table (Regional):
+        - 
+    - Matches Table (Regional):
+        -  
+    - Regional DataBases will be used that does async replication with one another
+    - A Global Blob Store for all the pictures and those pictures can be served via 
+    CDNs to all the global users world wide.
+    - 
+
+
+Users Create Profile:
+    - name
+    - gender
+    - sexual preference
+    - age
+
+Deck of potential users has other users on the platform who are within their distance
+paramaters
+
+Swiping
+    - Left (Dislike)
+    - Right (Like)
+
+Both Users Swipes right to match. When a match happens, the users should be notified immediately.
+
+When Match Happens, we can start chatting (will be ignored in this design)
+
+Two other features to take care of:
+    - Super-liking: Put yourself on the top of deck you are swiping on
+    - Undoing: Undo the previous swipe (undo till 3 last left swipes)
+
+Keeping the interview simple, and assume there are no caps on how many right swipe can be made
+within a span of 24 hours. Same goes for Supeliking and undoing.
+
+Users who will be put into the deck will be ranked based on some sort of scoring mechanism. 
+
+The deck Generation Algorithm is beyond the scope and will be taken care of at the backend. 
+
+There are 50 Million users on Tinder and we can assumer they are daily active users and are spread 
+globally. 
+
+For Latency, deck for the first 200 profiles will be without latency and post that, there could
+be latencies. Also Latency can be expected during app load. 
+
+For avalability, we will have out of the box available SQL set up and we can stop worrying
+about availability. 
+
+
+
