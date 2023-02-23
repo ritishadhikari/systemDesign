@@ -61,6 +61,7 @@ After 20 swipes, refetch of the next 20 profiles can take place simultaneously. 
 
 When 180 likes have been swiped, and there are only 20 matches remaining, that time the deck regenaration
 service is re-triggered. 
+
 Swiping
     - Left (Dislike)
     - Right (Like)
