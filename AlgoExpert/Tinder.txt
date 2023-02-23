@@ -6,6 +6,8 @@ Overall Storage Overview:
         - name
         - gender 
     - Decks Table (Regional):
+        - userID
+        - potentialMatches: list of userIDs (Defaults to 200 Potential Matches)
         - 
     - Swipes Table (Regional):
         - 
@@ -14,18 +16,51 @@ Overall Storage Overview:
     - Regional DataBases will be used that does async replication with one another
     - A Global Blob Store for all the pictures and those pictures can be served via 
     CDNs to all the global users world wide.
-    - 
+    
 
 
 Users Create Profile:
-    - name
+    - id:  automatically created while creating the ID
+    - name: 
     - gender
     - sexual preference
     - age
+    - geo Location: changes when ever user logs in
+    - pictures: string - address of the picture location in the blob store
+    - Total Space required would be 2KB * 50M users = 2000 B * 50000000 = 2*5^10
+    = 10*10^9 Bytes = 10 GB
+    - Considering we have 10-50 regions, so overall storage space required would be: 
+    10 GB * 50 = 500 GB of SQL storage
+    - 2MB per picture but with dimensionality reduction and lossy compression we have 50 KB per
+    picture, 5 picture per user and 50M user so in total: 50*10^3*5*50*10^6
+    =12500*10^9 Bytes=12.5*10^12 Bytes =12.5 TBs. 
+    - Picture will be shared via CDNs globally.
+    - 
+    
+
 
 Deck of potential users has other users on the platform who are within their distance
-paramaters
+paramaters. 
 
+The Deck Generation Algorithm will use both the profile table and the decks table and it
+will generate rows containing userID and DeckID of individual user. Individual users would
+have 40 Matches in the form of list stored locally. Once the List gets exhausted, 
+the Deck Generation Service will be called again until 200 users are exhausted.
+
+The Deck Generation service is generated every day for active users taking into consideration
+the updated location of the users present in the location.
+
+The total space of images required for the Deck Table would be 50KB*5Images*40Profiles which
+will be equal to 10000 KB=10MB per user. 
+
+Whenever an user does the Swiping, the removal of those pic from the top 200 Potential Matches happens 
+simultaneously. 
+
+After 20 swipes, refetch of the next 20 profiles can take place simultaneously. Note initially
+40 profiles will be fetched and store locally. This is a proactive measure to reduce latency.
+
+When 180 likes have been swiped, and there are only 20 matches remaining, that time the deck regenaration
+service is re-triggered. 
 Swiping
     - Left (Dislike)
     - Right (Like)
@@ -45,7 +80,7 @@ Users who will be put into the deck will be ranked based on some sort of scoring
 
 The deck Generation Algorithm is beyond the scope and will be taken care of at the backend. 
 
-There are 50 Million users on Tinder and we can assumer they are daily active users and are spread 
+There are 50 Million users on Tinder and we can assume they are daily active users and are spread 
 globally. 
 
 For Latency, deck for the first 200 profiles will be without latency and post that, there could
@@ -53,6 +88,9 @@ be latencies. Also Latency can be expected during app load.
 
 For avalability, we will have out of the box available SQL set up and we can stop worrying
 about availability. 
+
+Requests from the users will come from Round Robin Load Balancers, followed by which the users 
+will be redirected to various services mentioned above.
 
 
 
