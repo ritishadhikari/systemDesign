@@ -9,10 +9,26 @@ Overall Storage Overview:
         - userID
         - potentialMatches: list of userIDs (Defaults to 200 Potential Matches)
         - 
-    - Swipes Table (Regional):
-        - 
+    
+    - Swiping
+        - Left (Dislike)
+        - Right (Like)
+        - SuperLike
+        - swiperID (me)
+        - swipeeID (the girl)  -> index
+        - swipeType: Like/Pass  
+        - timestamp     -> index
+        
+        - The swipeeID will check immediately whether the SwipeeID has also liked
+        the swiperID and if yes, then both will be notified with a match
+        - Superliking will put the swiperID at the top of the deckTable for the particular
+        swipeeID
     - Matches Table (Regional):
-        -  
+        - userOneID
+        - userTwoID
+        - timestamp 
+
+
     - Regional DataBases will be used that does async replication with one another
     - A Global Blob Store for all the pictures and those pictures can be served via 
     CDNs to all the global users world wide.
@@ -62,9 +78,6 @@ After 20 swipes, refetch of the next 20 profiles can take place simultaneously. 
 When 180 likes have been swiped, and there are only 20 matches remaining, that time the deck regenaration
 service is re-triggered. 
 
-Swiping
-    - Left (Dislike)
-    - Right (Like)
 
 Both Users Swipes right to match. When a match happens, the users should be notified immediately.
 
@@ -92,6 +105,7 @@ about availability.
 
 Requests from the users will come from Round Robin Load Balancers, followed by which the users 
 will be redirected to various services mentioned above.
+
 
 
 
