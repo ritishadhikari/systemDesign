@@ -18,16 +18,15 @@ Overall Storage Overview:
         - swipeeID (the girl)  -> index
         - swipeType: Like/Pass  
         - timestamp     -> index
-        
         - The swipeeID will check immediately whether the SwipeeID has also liked
         the swiperID and if yes, then both will be notified with a match
         - Superliking will put the swiperID at the top of the deckTable for the particular
         swipeeID
+
     - Matches Table (Regional):
         - userOneID
         - userTwoID
         - timestamp 
-
 
     - Regional DataBases will be used that does async replication with one another
     - A Global Blob Store for all the pictures and those pictures can be served via 
