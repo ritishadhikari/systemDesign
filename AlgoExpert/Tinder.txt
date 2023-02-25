@@ -17,7 +17,7 @@ Overall Storage Overview:
         - swiperID (me)
         - swipeeID (the girl)  -> index
         - swipeType: Like/Pass  
-        - timestamp     -> index
+        - timestamp -> index
         - The swipeeID will check immediately whether the SwipeeID has also liked
         the swiperID and if yes, then both will be notified with a match
         - Superliking will put the swiperID at the top of the deckTable for the particular
@@ -32,8 +32,6 @@ Overall Storage Overview:
     - A Global Blob Store for all the pictures and those pictures can be served via 
     CDNs to all the global users world wide.
     
-
-
 Users Create Profile:
     - id:  automatically created while creating the ID
     - name: 
@@ -50,9 +48,6 @@ Users Create Profile:
     picture, 5 picture per user and 50M user so in total: 50*10^3*5*50*10^6
     =12500*10^9 Bytes=12.5*10^12 Bytes =12.5 TBs. 
     - Picture will be shared via CDNs globally.
-    - 
-    
-
 
 Deck of potential users has other users on the platform who are within their distance
 paramaters. 
@@ -75,8 +70,7 @@ After 20 swipes, refetch of the next 20 profiles can take place simultaneously. 
 40 profiles will be fetched and store locally. This is a proactive measure to reduce latency.
 
 When 180 likes have been swiped, and there are only 20 matches remaining, that time the deck regenaration
-service is re-triggered. 
-
+service is re-triggered.  
 
 Both Users Swipes right to match. When a match happens, the users should be notified immediately.
 
