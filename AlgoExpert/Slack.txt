@@ -1,0 +1,90 @@
+Things that can be done on Slack:
+    - Communicate with other people
+    - Send messages
+    = Send Private Messages on one-on-one chats
+    - Send Group Messages in channels
+    - Within Channels you have private channels, public channels, etc
+    - Create and Delete Channels
+    - Update their settings
+    - Invite people to slack or to certain channels/groups/organizations in Slack
+
+In this design we need to focus on the core messaging functionality and that involves the
+one-on-one direct messages and the group channels.
+
+Don't worry about channel settings or the extra functionalities mentioned above.
+
+As for this interview we can consider only one channel per organization and no need to 
+consider private vs public channels
+
+Slack also includes the unread messages in bold and the number of mentions of a particular
+user in the channel
+
+Also the design must accomodate cross platform sync, so that if an user has 
+read the messages from one of the channels, then the unread should disappear from the other 
+devices as well from where the user has logged on to.
+
+We do need to keep in mind about the communication backend but we do not need to build the 
+desktop client.
+
+As of now, we can consider that pinning/saving the messages to be disabled, but they can be
+explored later. Only basic text in messaging has to be given consideration.
+
+Number of Users is 20 Million. Maximum number of people for a single organization/channel in 
+Slack is 50000.
+
+Latency should not be compromised for chat exchange, availability can be ignored for this
+design.
+
+We can focus on a single region and not think from a global perspective.
+
+Here we are focussing on instant messaging and also retrieving old messages/ unseen messages
+when a system is rebooted
+
+- Persistent Storage (on boot)
+    - Use SQL DataBases
+    - Store it as User Channel pair
+    - There will be the following tables
+        - Channel-Organization pair
+        - Channel-User Pair 
+        - Historical Messages Table
+            - uniqueid ()
+            - channelid ()
+            - senderid ()
+            - sentat (timestamp)
+            - body (string)
+            - mentions - of a particular use
+    - When ever an user opens the slack-app, an API call is made to the Channel-User Pair
+    table where in all the channel belongind to the user are displayed
+    - When ever an user opens a channel from Slack App, the query is made to the Historical
+    message table and last 50 messages are opened
+    - To display the last unread messages to an user, the system should keep track on the 
+    last login of the user such that messages coming after the users last login time will
+    come as an unread message
+    - Hence an additional Table needs to be created called Last Read Reciept Table which 
+    stores when was the last time the user accessed this channel
+        - id
+        - orgID
+        - channelID
+        - userID
+        - lastSeen (timestamp)
+    - Everytime the user comes out of a channel, the row is updated with the user-channel
+    history
+    - Channel Last Activity table will give the last time when the channel was active
+        - id
+        - orgID
+        - channelID
+        - lastMessageTime
+    - When an user boots in and if the last login time of the user is before the last Activity
+    of the channel, then the user will see bold fonts pertaining to the unread messages 
+    - Unread Mentions for an user also has to be taken into consideration, hence we will 
+    need a separate table called Last Unread User Mentions Count. When some mention happens
+    to an user, we write it down in a database.
+        - id
+        - orgID
+        - channelID
+        - userID
+        - count
+    - When an user access the channel, we mark the above count for that user to Zero.
+
+- RealTime (messaging)
+
