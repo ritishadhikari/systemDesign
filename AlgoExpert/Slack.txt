@@ -85,6 +85,19 @@ when a system is rebooted
         - userID
         - count
     - When an user access the channel, we mark the above count for that user to Zero.
+    - For the purpose of sharding the database, smart rebalancing based on organization size
+    needs to be carried out.
+    - We would need a smart service which does the sharding of the database asynchronously. These
+    smart services utilizes ZooKeeper or etcd at the backend
+    - When a request is made by a client, it hits the load balancers which diverts to the servers
+    and the the service uitlizing etcd/zookeeper so as to get the shard which needs to be called for
+    completion of the request.
+- RealTime (messaging):
+    - Realtime messaging once it hits the load balancer, gets stored in the database and then 
+    is also pushed through pub/sub topics to the correct clients who should be listening to this
+    messages through their own Kafka Subscriptions made by them to the original Subscriptions
+    - The Sharding of the PubSub topics needs to be carried out, where in topics are sharded based
+    on the orgID by a similar smart sharding service which will dump the message to the topic which
+    will take it to the respective client, where the client is subscribed to the secondary topic
 
-- RealTime (messaging)
 
