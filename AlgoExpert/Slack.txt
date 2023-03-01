@@ -99,5 +99,5 @@ when a system is rebooted
     - The Sharding of the PubSub topics needs to be carried out, where in topics are sharded based
     on the orgID by a similar smart sharding service which will dump the message to the topic which
     will take it to the respective client, where the client is subscribed to the secondary topic
-
+    
 
