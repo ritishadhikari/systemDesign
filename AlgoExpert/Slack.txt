@@ -54,7 +54,7 @@ when a system is rebooted
             - body (string)
             - mentions - of a particular use
     - When ever an user opens the slack-app, an API call is made to the Channel-User Pair
-    table where in all the channel belongind to the user are displayed
+    table where in all the channel belonging to the user are displayed
     - When ever an user opens a channel from Slack App, the query is made to the Historical
     message table and last 50 messages are opened
     - To display the last unread messages to an user, the system should keep track on the 
