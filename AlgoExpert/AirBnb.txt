@@ -1,0 +1,57 @@
+Host and Rental services are the two core products of AirBNB. We need to focus on both 
+the services.
+
+Hosts must be able to create and delete listings, while rentals must be able to browse
+through listings. 
+
+For rentals, we must be able to browse through the listings or properties or book them. 
+We can forget about what happens post the bookings afterwards. 
+
+Multiple Users must be able to visit the properties at the same time for a given date-range, 
+but incase a property gets booked, that property will not be visible for the remaining users.
+
+When ever an user clicks on book room, that room is placed on hold for the time-being 
+(15 mins).
+
+In this system design, lets focus on browsing and booking, the rest can be ignored like 
+authentication and authorization. 
+
+Search should be based on date-range and location. Price and other paramaters may not be 
+considered for this interview. 
+
+Location can be stored in the form of latitudes and longitudes. 
+
+Consider US Based Region with 50 Million users and 1 M listers. Also there should not be any
+downtime in the browsing listings, nor should there be any latencies.
+
+Host lists the properties in a persistent storage like SQL and until the host deletes these
+properties, the records in the SQL table will persist. 
+
+Since we are using the geo-locations, we can store these locations within a quad tree
+for fast querying, although for only 1Million listings, quad-tree sort of design may be 
+an overkill. For GMAP scale solutions, Quadtree makes more sense.
+
+Ideally QuadTree should be stored in memory specific servers. 
+
+If we have 10KB per listing, then considering there are 1M listings, we would have 
+10*10^6*10*10^3=10*10^11=1000 GB= 1TB of data which can be stored in memory
+
+There should be three in-memory quadtree servers, one of which will be elected as the 
+leader through leader election, where one server will be the leader and the rest two 
+will be followers. With this technique, the availability issue can be minimized.
+
+Every definite time intervals the quadtree servers fetches the impending results and 
+consequently the quadtree gets updated. 
+
+The request of the hosts are diverted through Load Balancers to the Listing APIs which updates 
+leader of the quadtree server while it also updates the SQL table simultaneously.
+
+While deleting the any listing requests also, the response reaches to the deleteListing APIs 
+through Load Balancers to both the SQL servers and the leader of the QuadTree InMemory server.
+
+ 
+
+
+
+
+
