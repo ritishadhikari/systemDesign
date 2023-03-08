@@ -46,7 +46,7 @@ consequently the quadtree gets updated.
 The request of the hosts are diverted through Load Balancers to the Listing APIs which updates 
 leader of the quadtree server while it also updates the SQL table simultaneously.
 
-While deleting the any listing requests also, the response reaches to the deleteListing APIs 
+While deleting any listing requests also, the response reaches to the deleteListing APIs 
 through Load Balancers to both the SQL servers and the leader of the QuadTree InMemory server.
 
  
