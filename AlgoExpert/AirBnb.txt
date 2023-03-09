@@ -49,6 +49,21 @@ leader of the quadtree server while it also updates the SQL table simultaneously
 While deleting any listing requests also, the response reaches to the deleteListing APIs 
 through Load Balancers to both the SQL servers and the leader of the QuadTree InMemory server.
 
+For Renters there will be the following kinds of apis:
+    - GET:
+        - This API will get a list of lists from the QuadTree server which will based on the 
+        location
+        - 
+    - RESERVE
+        - Another SQL Table called Reservations must be created
+        - When a room is attempted to be reserved, the request first flows in through Load 
+        Balancer to the the Reservation table where the room's reservation status is checked
+        - If the room is already reserved, the notification is made to the user that the room
+        is reserved for that timeframe of 15 minutes, but if there ain't any reservation records, 
+        then reservation process starts
+    - LIST
+
+
  
 
 
