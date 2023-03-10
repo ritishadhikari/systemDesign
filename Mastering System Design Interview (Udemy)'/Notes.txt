@@ -161,7 +161,7 @@ The Detailed Workflow:
         past bookings are stored in a Cassandra DB with partition on UserIDs
     - UI App for Management Service to get a view on current bookings by pulling from the 
     Rooms Availability DB through Redis (so as not to put more load on the Avalability DB) and
-    a Cassandra DB which contains historic imformation on users bookings and Cancellation Status.
+    a Cassandra DB which contains historic information on users bookings and Cancellation Status.
     - For Analytics, Spark Streaming can be utilized directly from Kafka. For Machine Learning, train
     from Cassandra DB and Predict using Kafka and Spark Streaming.
 
