@@ -28,7 +28,7 @@ Host lists the properties in a persistent storage like SQL and until the host de
 properties, the records in the SQL table will persist. 
 
 Since we are using the geo-locations, we can store these locations within a quad tree
-for fast querying, although for only 1Million listings, quad-tree sort of design may be 
+for fast querying, although for only 1 Million listings, quad-tree sort of design may be 
 an overkill. For GMAP scale solutions, Quadtree makes more sense.
 
 Ideally QuadTree should be stored in memory specific servers. 
