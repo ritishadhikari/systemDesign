@@ -1,0 +1,49 @@
+- Channel Info: Streamer's info, followers, Channel's description, etc
+    - GetChannelInfo API 
+        - request: (channelID: string)
+        - response: 
+            - name: dtr
+            - description: str
+            - currentStreamTitle: str
+            - followerCount: int
+    
+- follow (will not update in real time, until the page is refreshed)
+    - ToggleFollow API:
+        - request: (channelID: string)
+        - response:
+            - follow/unfollow
+- subscribe (paid feature)
+    - Subscribing is similar to follow, with some additional details, like providing payment
+    details (credit card, paypal, etc)
+    - CreateSub API:
+        - requests:    
+            - channelID: str
+            - subInfo: subInfo
+            - payInfo: payInfo
+        - response:
+            - subscriptionID: str
+            - validity: timeStamp
+            - description: str
+    - CancelSub API:
+        - requests: 
+            - channelID: str
+        - response:
+            - description: str
+            
+- live chat (handle emotes)
+- live stream video with video info
+- concurrent viewers (update every 30 seconds)
+- recommended channels
+
+For this interview we are designing all of this, except for the recommended channels
+
+If a user wants to follow a particular channel, then automatically that button should get
+switched from follow to unfollow in real time. Same for subscribe to unsubscribe.
+
+For the live chats, we do want to have twitch emotes but we don't have to worry about emotes
+which are applicable for select subscribers or purchasable emotes.
+
+Also we should handle banning of users in chats who are trying to spam the chats.
+
+When ever an user tries to access any service, the user's token will be passed by default.
+
