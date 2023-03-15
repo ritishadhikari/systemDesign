@@ -30,9 +30,47 @@
         - response:
             - description: str
             
-- live chat (handle emotes)
-- live stream video with video info
+- live chat (handle emotes):
+    - See Messages which are coming in
+    - Type in Messages
+    - Handle Emotes
+    - When ever an user types the emote like :kappa:, then the emote will be pulled out from a 
+    lookup table and displayed.
+    - streamMessage API: Long Lived Websocket connection for steaming messages continously
+        - requests:
+            - channelID: str
+        - response: 
+            - message {sender: str, text: str, timestamp: ISO dateFormat}
+    - sendMessage:
+        - Requests:
+            - channelID: str
+            - message: str
+        - Response:
+            - message: str / error: if user is banned from sending message
+- live stream video with video info:
+    - streamVideo:
+        - requests: 
+            - channelID: str
+            - videoQuality: enum
+        - response:
+            - VideoInfo
+
 - concurrent viewers (update every 30 seconds)
+    - when ever an user starts streaming videos, they become concurrent viewer of that stream
+    - getConcViewers:
+        - requests: 
+            - channelID: str
+        - response:
+            - count: integer
+- bannedUsersInfo:
+    - GetRelToChannel(channelID: str)
+        - requests:
+            - channelID: str
+        - response:
+            - isBanned: bool
+            - isFollowing: bool
+            - subscription: sub/null
+            - ismoderator: bool
 - recommended channels
 
 For this interview we are designing all of this, except for the recommended channels
