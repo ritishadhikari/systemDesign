@@ -2,7 +2,7 @@
     - GetChannelInfo API 
         - request: (channelID: string)
         - response: 
-            - name: dtr
+            - name: str
             - description: str
             - currentStreamTitle: str
             - followerCount: int
